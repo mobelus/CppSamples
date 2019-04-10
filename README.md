@@ -32,7 +32,7 @@ bool compareFunc(const Param& lhs, const Param& rhs)
 ```
 
 ```
-  // Better
+// Better
 bool compareFunc(const Param& lhs, const Param& rhs)
 {
   bool res = false;
