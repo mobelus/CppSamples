@@ -63,7 +63,7 @@ bool compareFunc(const Param& lhs, const Param& rhs)
       continue;
 
     res = lhsStr[i] < rhsStr[i];
-      break;
+    break;
   }
   return res;
 }
