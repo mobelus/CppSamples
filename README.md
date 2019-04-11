@@ -28,7 +28,7 @@ for(int i=0; i < vec.size(); ++i)
 ```
 
 ```
-// Works // Old but Gold
+// The Best
 for(int i=0, ilen = vec.size(); i < ilen; ++i)
 {
   int b = vec[i];
