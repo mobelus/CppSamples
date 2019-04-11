@@ -12,6 +12,32 @@ https://www.tutorialspoint.com/cplusplus/cpp_interview_questions.htm
 
 # Optimization
 
+### for cycle 
+
+(*) ATTENTION ... Do NOT Use if you have to check size of the Array every time
+
+```
+// Works // Old but Gold
+std::vector vec;
+
+for(int i=0; i < vec.size(); ++i)
+{
+  int b = vec[i];
+}
+
+```
+
+```
+// Works // Old but Gold
+for(int i=0, ilen = vec.size(); i < ilen; ++i)
+{
+  int b = vec[i];
+}
+```
+
+
+
+
 ### operator <
 
 ```
