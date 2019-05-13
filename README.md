@@ -109,6 +109,7 @@ public:
   
 private:
   mutable QMutex _internalLock;
+  States state;
 };
   
 MyClass::MyClass(QObject* parent) : _internalLock {}
