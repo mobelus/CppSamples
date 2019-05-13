@@ -101,25 +101,24 @@ bool compareFunc(const Param& lhs, const Param& rhs)
 ```
 class MyClass : public QObject
 {
-	Q_OBJECT
+  Q_OBJECT
 public:
   MyClass();
   ~MyClass();
   state getState() const;
   
 private:
-	mutable QMutex					_internalLock;
+  mutable QMutex _internalLock;
 };
   
-MyClass::MyClass(QObject* parent) :
-_internalLock {}
+MyClass::MyClass(QObject* parent) : _internalLock {}
 {
 }
 
 state MyClass::getState() const
 {
-	QMutexLocker locker(&_internalLock);
-	return _state;
+  QMutexLocker locker(&_internalLock);
+  return _state;
 }
 ```
 
