@@ -124,3 +124,48 @@ state MyClass::getState() const
 ```
 
 
+### Initialization over constructor with parameters
+
+- Allows to write less code inside the body of the function
+- const variables can be initialized in constructor and not inside the body of the class
+- References can be passed only like that and not any other way
+
+```
+// Bad Solution
+
+class MyClass
+{
+public:
+  MyClass(int a, double d, SubClass& s)
+  {
+    _a = a;
+    _d = 0.1; // (*) IMpossible here
+    _s = s; // ???
+  };
+  
+private:
+  int _a;
+  const double _d; // = 0.1; // (**) possible but not so good
+  Subclass _s;
+};
+```
+
+```
+// Reason Solution and Best Strategy
+
+class MyClass
+{
+public:
+  MyClass(int a, double d, SubClass& s) : _a(a), _d(0.1), _s(s)
+  { };
+  
+private:
+  int _a;
+  const double _d;
+  Subclass _s;
+};
+```
+
+
+
+
