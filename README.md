@@ -167,5 +167,9 @@ private:
 ```
 
 
+### Problems
 
+- access violation
+- devision by zero
+- out of range of array / memory
 
