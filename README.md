@@ -173,3 +173,8 @@ private:
 - devision by zero
 - out of range of array / memory
 
+
+### Pure WinAPI solutions
+
+https://github.com/tumagonx/portabat
+
