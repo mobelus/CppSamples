@@ -179,6 +179,8 @@ private:
 
 ### Lambda
 
+```
+
 [=](float a, float b) {
             return (std::abs(a) < std::abs(b));
         } // end of lambda expression
@@ -198,8 +200,11 @@ private:
 [this&](float a, float b) {
             return (std::abs(a) < std::abs(b));
         } // end of lambda expression
-        
+
+```
+
 + ЗАМЫКАНИЯ
+
 
 
 https://github.com/tumagonx/portabat
