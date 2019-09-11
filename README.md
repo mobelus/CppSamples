@@ -209,3 +209,61 @@ private:
 
 https://github.com/tumagonx/portabat
 
+
+# QT to STD replacements
+
+```
+	template <class T> bool containsForStdVector ( std::vector<T> & v, T isThisIn)
+	{
+		//if (!v.contains(uaBrowseFolderNodeId.identifier.numeric)) // QT_VER
+		return std::find(v.begin(), v.end(), isThisIn) != v.end();
+	}
+  
+```
+
+
+```
+#include <random>
+#include <iostream>
+#include <sstream>
+
+
+    unsigned int random_char()
+		{
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<> dis(0, 255);
+			return dis(gen);
+		}
+
+		std::string generate_hex(const unsigned int len)
+		{
+			std::stringstream ss;
+			for (unsigned int i = 0; i < len; i++)
+			{
+				const auto rc = random_char();
+				std::stringstream hexstream;
+				hexstream << std::hex << rc;
+				auto hex = hexstream.str();
+				ss << (hex.length() < 2 ? '0' + hex : hex);
+			}
+			return ss.str();
+		}
+
+		void toUpper(std::string& s)
+		{
+			std::transform(s.begin(), s.end(), s.begin(), toupper);
+		}
+
+		void toLower(std::string& s)
+		{
+			std::transform(s.begin(), s.end(), s.begin(), tolower);
+		}
+
+		std::string uuidStdGenerate()
+		{
+			std::string strUUID = generate_hex(32 / 2);
+			toUpper(strUUID);
+			return strUUID;
+		}
+```
