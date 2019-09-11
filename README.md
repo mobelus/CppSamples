@@ -274,8 +274,8 @@ https://github.com/tumagonx/portabat
 # Debug stuff by writing to a file with QT
 
 ```
-	/*
-	QString filename = "C:\\repos\\hmi\\src\\OpcUa\\Data.txt";
+	
+	QString filename = "C:\\folder\\test.txt";
 	QFile inFile(filename);
 	inFile.open(QIODevice::ReadOnly | QIODevice::Text);
 	QByteArray inputData = inFile.readAll();
