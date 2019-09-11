@@ -213,6 +213,9 @@ https://github.com/tumagonx/portabat
 # QT to STD replacements
 
 ```
+#include <vector>
+#include <algorithm>
+
 	template <class T> bool containsForStdVector ( std::vector<T> & v, T isThisIn)
 	{
 		//if (!v.contains(uaBrowseFolderNodeId.identifier.numeric)) // QT_VER
@@ -228,7 +231,7 @@ https://github.com/tumagonx/portabat
 #include <sstream>
 
 
-    unsigned int random_char()
+		unsigned int random_char()
 		{
 			std::random_device rd;
 			std::mt19937 gen(rd());
