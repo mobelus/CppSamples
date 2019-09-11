@@ -270,3 +270,29 @@ https://github.com/tumagonx/portabat
 			return strUUID;
 		}
 ```
+
+# Debug stuff by writing to a file with QT
+
+```
+	/*
+	QString filename = "C:\\repos\\hmi\\src\\OpcUa\\Data.txt";
+	QFile inFile(filename);
+	inFile.open(QIODevice::ReadOnly | QIODevice::Text);
+	QByteArray inputData = inFile.readAll();
+	inFile.close();
+
+	QFile file(filename);
+	file.open(QIODevice::WriteOnly);
+	QTextStream out(&file);
+	out << inputData;
+	out << "Thomas M. Disch: " << 334 << endl;
+	file.close();
+
+	/*
+		QFile _file(filename);
+		_file.cre
+		QTextStream out(&_file);
+		QString str = "123\n";
+		out << str << endl;
+	*/
+```
