@@ -1,6 +1,6 @@
 
 # PNG Example
-Small png Examples
+Single png inside md Example
 
 
 ![](Screenshot_51.png)
