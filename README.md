@@ -1,10 +1,4 @@
 
-# PNG Example
-Single png inside md Example
-
-
-![](Screenshot_51.png)
-
 
 # CppSamples
 Small cpp Examples
