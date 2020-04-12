@@ -3,6 +3,7 @@
 # CppSamples
 Small cpp Examples
 
+*Test*
 
 # CppSamples
 Small cpp Examples
