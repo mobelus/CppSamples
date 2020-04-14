@@ -2650,3 +2650,556 @@ int main()
 }
 
 ```
+
+
+# F2FA1C23-2E60-4135-91D3-193007215549
+IMPLEMENT_OLECREATE(<<class>>, <<external_name>>, 
+0xf2fa1c23, 0x2e60, 0x4135, 0x91, 0xd3, 0x19, 0x30, 0x7, 0x21, 0x55, 0x49);
+
+
+### Q: Шпаргалка по QT !
+
+http://cppstudio.com/post/11167/
+
+### Q: Как работают события в c++ ?
+
+https://habr.com/ru/post/424593/
+
+### Q: Что такое QEvent QT ?
+
+// TO DO
+
+### Q: Как отловить / получить Event из какого-то объекта или внутри определённого объекта в QT ?
+
+https://www.opennet.ru/docs/RUS/qt3_prog/x3974.html
+
+В Qt предусмотрены **ПЯТЬ** уровней, на которых событие может быть перехвачено и обработано:
+
+1. **Обработка событий в функциях-обработчиках**
+
+Перекрытие обработчиков событий, таких как: mousePressEvent(), keyPressEvent() и paintEvent(), безусловно самый распространенный способ. Мы уже видели множество примеров тому.
+
+2. **Перекрытие метода QObject::event()**
+
+Внутри этого обработчика мы можем перехватывать события до того, как они попадут в специализированные функции-обработчики. Этот подход чаще всего используется для того, чтобы изменить реакцию виджета на клавишу табуляции, как это было показано ранее. Он так же используется для обработки событий, которые встречаются не так часто, например: LayoutDirectionChange. Если мы перекрываем функцию event(), то необходимо предусмотреть вызов обработчика event() базового класса, чтобы обработать события, которые нас не интересуют.
+
+3. **Установка фильтра событий для QObject**
+
+После того, как фильтр будет зарегистрирован функцией installEventFilter(), все события, предназначающиеся указанному объекту, сначала будут попадать в обработчик eventFilter(). Такой способ мы использовали для перехвата событий от клавиши "пробел" в примере выше.
+
+4. **Установка фильтра событий объекта QApplication**
+
+После регистрации фильтра, любое событие, предназначенное для любого объекта в приложении, будет сначала попадать в обработчик eventFilter(). Такой подход чаще всего используется в целях отладки и реализации в приложении скрытых сюрпризов (так называемых "пасхальных яиц").
+
+5. **Создание дочернего класса от QApplication и перекрытие метода notify()**
+
+Qt вызывает QApplication::notify(), чтобы передать событие приложению. Таким способом можно перехватить любое событие до того, как оно попадет в фильтр событий. Вообще фильтры событий более удобны, поскольку допускается одновременное существование любого количества фильтров, а функция notify() может быть только одна.
+
+- ** Event Handlers **
+
+The normal way for an event to be delivered is by calling a virtual function.
+For example, QPaintEvent is delivered by calling QWidget::paintEvent().
+For example, the following code handles left mouse button clicks on a custom checkbox widget while passing all other button clicks to the base QCheckBox class:
+```
+keyPressEvent(QKeyEvent *event) 
+mouse release
+mouseMoveEvent
+void MyCheckBox::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        // handle left mouse button here
+    } else {
+        // pass on other buttons to base class
+        QCheckBox::mousePressEvent(event);
+    }
+}
+
+bool MyWidget::event(QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        if (ke->key() == Qt::Key_Tab) {
+            // special tab handling here
+            return true;
+        }
+    } else if (event->type() == MyCustomEventType) {
+        MyCustomEvent *myEvent = static_cast<MyCustomEvent *>(event);
+        // custom event handling here
+        return true;
+    }
+
+    return QWidget::event(event);
+}
+```
+
+- **Event Filters**
+
+Sometimes an object needs to look at, and possibly intercept, the events that are delivered to another object. For example, dialogs commonly want to filter key presses for some widgets; for example, to modify Return-key handling.
+```
+bool FilterObject::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == target && event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Tab) {
+            // Special tab handling
+            return true;
+        } else
+            return false;
+    }
+    return false;
+}
+```
+
+- Sending Events
+```
+sendEvent() processes the event immediately. When it returns, the event filters and/or the object itself have already processed the event. For many event classes there is a function called isAccepted() that tells you whether the event was accepted or rejected by the last handler that was called.
+postEvent() posts the event on a queue for later dispatch.
+```
+
+### Q: Разница между sendEvent() и postEvent() ?
+
+- sendEvent() - обрабатывает событие срезу, в обход очереди сообщений И она возвращает значение и фильтр или объект к этому времени уже обработали его. У некоторых классов есть isAccepted() был ли евент принят или отклонён обработчиком событий.
+- postEvent() - ставит событие в очередь сообщений для последующей обработки.
+
+### Q: Как работают события в QT ?
+
+// TO DO
+
+
+
+### Q: Что такое сигнал ?
+
+Сигналы являются публично доступными функциями и могут быть вызваны где угодно, но рекомендуется их вызывать только в классе, где они были определены, а также в его подклассах
+Сигналы автоматически генерируются в moc и не должны быть определены в .cpp файле, а также они никогда не возвращают результат.
+
+### Q: 
+1. случай - 2 объекта находятся в одном потоке и происходит у них сигнал 
+2. случай - 2 объекта находятся в разных потоках и происходит у них сигнал 
+Будет ли какаято разница ?
+```
+Соединение происходит. Но слот никогда не сработает. Объясню почему. 
+
+QObject::connect(server,SIGNAL(runIt(int)),func,SLOT(run(int))); 
+этот метод, кроме этих четырёх параметров имеет и пятой параметр по умолчанию.
+Он задаёт тип соединения.
+Qt поддерживает 4 типа signal-slot connection-ов типов соединений:
+1) Auto Connection (default) - If the signal is emitted in the thread which the receiving object has affinity then the behavior is the same as the Direct Connection. Otherwise, the behavior is the same as the Queued Connection."
+2) Direct Connection - The slot is invoked immediately, when the signal is emitted. The slot is executed in the emitter's thread, which is not necessarily the receiver's thread.
+3) Queued Connection - The slot is invoked when control returns to the event loop of the receiver's thread. The slot is executed in the receiver's thread. Blocking Queued Connection The slot is invoked as for the Queued Connection, except the current thread blocks until the slot returns. Note: Using this type to connect objects in the same thread will cause deadlock.
+4) Unique Connection - The behavior is the same as the Auto Connection, but the connection is made only if it does not duplicate an existing connection. i.e., if the same signal is already connected to the same slot for the same pair of objects, then the connection is not made and connect() returns false.
+
+По умолчанию сотит AutoConnection. Что это означает?
+Если у вас два соединённых объекта находятся 
+В ОДНОМ и том же потоке, то слот будет вызываться сразу же,
+когда будет имитирован сигнал.
+
+Но когда Ваши объекты находятся 
+В РАЗНЫХ потоках, имитированные сигналы не будут вызывать слот сразу,
+они будут помещены в цикл событий потока, и будут исполнены,
+когда придёт их очередь, т.е. сигнал не сможет быть доставлен
+(слот не сможет быть вызван), пока не закончится выполнение той функции,
+в которой был имитирован сигнал.
+
+У Вас бесконечный цикл, поэтому и все Ваши сигналы на очереди исполнения.
+Остановите Вашу функции)) и удивитесь, сколько же раз будет вызван слот ;)
+
+В Вашем случае, решение проблемы, это указать в connect пятым аргументом DirectConnection.
+Но это не рекомендуется делать по документации qt, потому что это не безопасно,
+если объекты находятся в разных потоках. Всё, что я сказал, есть в док.
+```
+
+1) Создаю объект со слотом run() в основном потоке (прямо в main()):
+```
+Function* func = new Function;
+```
+2) Запускаю асинхронно serverThreadGlobal:
+```
+QFuture<int> future = QtConcurrent::run(serverThreadGlobal,func);
+```
+3) Внутри функции создаю объект класса с сигналом runIt и соединяю сигнал и слот:
+```
+int serverThreadGlobal(Function* func)
+{
+    std::cout<<"serverThreadGlobal\n";
+    Server* server = new Server;
+    QObject::connect(server,SIGNAL(runIt(int)),func,SLOT(run(int)));
+//тут испускается сигнлал emit runIt(0);
+    server->serverCycle(func);
+    return 1;
+}
+```
+4) Не соединяет! (слот void Function::run(int n) не срабатывает)
+```
+Код функции serverCycle
+
+void Server::serverCycle(Function* func)
+{
+    emit runIt(0);
+    while(1)
+    {
+        Sleep(1000);
+        emit runIt(0);
+        std::cout<<"working\n";
+    }
+}
+```
+
+### Q: Варианты взаимодействия между С++ и QML ?
+
+1. Макрос Q_PROPERTY в бекенде С++ класса (val, get, set, sig valChanged)
+2. Макрос Q_INVOKABLE в бекенде С++ класса (Q_INVOKABLE-метод)
+3. Общение через Сигналы заведённые на стороне C++
+4. Общение через Сигналы заведённые на стороне QML
+5. QQmlProperty::read(object, "someNumber").toInt();
+6. QMetaObject::invokeMethod(...)
+7. QQuickView view(QUrl::fromLocalFile("MyItem.qml")); QObject *item = view.rootObject();
+
+1. Макрос Q_PROPERTY в бекенде С++ класса
+
+- позволяет задать переменную на стороне плюсов и qml. Оба слоя одинаково имеют к ней доступ.
+- с++ может сделать set через set метод, qml и cpp получить через get метод 
+- этот макрос так же определяет сигнал  somePropertyChanged, чтобы сpp-сторона информировала qml об изменении переменной
+- на стороне qml моно добавить соотвествующий обработчик onSomePropertyChanged: { } чтобы отловить событие об изменении
+```
+class BackEnd : public QObject { Q_OBJECT
+    Q_PROPERTY(QString userName READ userName WRITE setUserName NOTIFY userNameChanged)
+public: int   getSomeProperty() const;
+        void  setSomeProperty(const int &);
+private: int  someProperty;
+signals: void somePropertyChanged();
+...
+```
+
+```
+#include "backend.h"
+int main(int argc, char *argv[])
+{
+  qmlRegisterType<BackEnd>("io.qt.examples.backend", 1, 0, "BackEnd");
+...
+```
+
+```
+import io.qt.examples.backend 1.0
+
+ApplicationWindow { id: root
+  BackEnd {
+    id: backend
+    someProperty: 10
+    omSomePropertyChanged: {
+      // наш код
+    }
+  }
+...
+```
+
+2. Макрос Q_INVOKABLE в бекенде С++ класса
+позволит вызывать Q_INVOKABLE-метод как метод qml объекта
+```
+class TestClass : public QObject
+{
+    Q_OBJECT
+public:
+    Q_INVOKABLE
+    void myMethod();
+};
+void TestClass::myMethod() { qDebug() << "!"; }
+```
+
+```
+import ModuleName 1.0
+TypeName{
+ id: myObj
+  someProperty: 10
+  }
+
+ Rectangle{
+  MouseArea {
+   onClicked: {
+    myObj.myMethod();
+ }}}
+
+```
+
+
+3. Общение через Сигналы заведённые на стороне C++
+```
+class TestClass : public QObject
+{
+    Q_OBJECT
+signals:
+    void someSignal();
+};
+...
+void TestClass::mySlot()
+{
+    emit someSignal();
+}
+```
+
+```
+TypeName
+{
+  id: myObj
+  onSomeSignal: {
+    Qt.quit();
+  }
+} 
+```
+
+4. Общение через Сигналы заведённые на стороне QML
+```
+Item { 
+    signal qmlSignal(msg: string)
+...
+```
+
+```
+class MyClass : public QObject
+{
+    Q_OBJECT
+public slots:
+    void cppSlot(const QString &msg) {
+        qDebug() << "Called the C++ slot with message:" << msg;
+    }
+};
+```
+
+```
+int main(int argc, char *argv[]) {
+    QGuiApplication app(argc, argv);
+
+    QQuickView view(QUrl::fromLocalFile("MyItem.qml"));
+    QObject *item = view.rootObject();
+
+    MyClass myClass;
+    QObject::connect(item, SIGNAL(qmlSignal(QString)),
+                     &myClass, SLOT(cppSlot(QString)));
+...
+```
+
+5. QQmlProperty::read(object, "someNumber").toInt();
+```
+// MyItem.qml
+import QtQuick 2.0
+Item { property int someNumber: 100; }
+```
+The value of the someNumber property can be set and read using QQmlProperty, or QObject::setProperty() and QObject::property():
+```
+QQmlEngine engine;
+QQmlComponent component(&engine, "MyItem.qml");
+QObject *object = component.create();
+qDebug() << "Property value:" << QQmlProperty::read(object, "someNumber").toInt();
+QQmlProperty::write(object, "someNumber", 5000);
+qDebug() << "Property value:" << object->property("someNumber").toInt();
+object->setProperty("someNumber", 100);
+```
+
+6. QMetaObject::invokeMethod(object, "myQmlFunction", Q_RETURN_ARG(QString, returnedValue), Q_ARG(QString, msg));
+```
+import QtQuick 2.0
+
+Item {
+    function myQmlFunction(msg: string) : string {
+        console.log("Got message:", msg)
+        return "some return value"
+    }
+}
+```
+
+7. QQuickView view(QUrl::fromLocalFile("MyItem.qml")); QObject *item = view.rootObject();
+
+Получив rootObject() можно по id / objectName объектов ступскаться вгулбь по дереву объектов
+и организовывать общение при помощи четырёх ранее описанных методов.
+
+```
+ signal qmlSignal(anObject: Item)
+```
+
+```
+ void cppSlot(QQuickItem *item) {
+       qDebug() << "Item dimensions:" << item->width() << item->height();
+```
+
+### Q: Casablanca c++Library for Rest ?
+
+// TO DO
+
+
+### Q: С++ 14 Стандарт ?
+https://ru.wikipedia.org/wiki/C%2B%2B14
+
+1	Изменения в языке
+1.1	Вывод типа возвращаемого значения для функций
+1.2	Альтернативный вывод типа при объявлении
+1.3	Уменьшение ограничений на константные выражения
+1.4	Шаблоны переменных
+1.5	Агрегатная инициализация классов с инициализаторами полей
+1.6	Литералы двоичных чисел
+1.7	Разделители разрядов
+1.8	Обобщённые лямбда-функции
+1.9	Захват выражений для лямбда-функций
+1.10	Атрибут [[deprecated]]
+2	Новые функции стандартной библиотеки
+2.1	Разделяемые мьютексы и блокировки
+2.2	Гетерогенный поиск в ассоциативных контейнерах
+2.3	Стандартные пользовательские литералы
+2.4	Адресация к кортежам по типу
+2.5	Прочие изменения стандартной библиотеки
+3	Примечания
+
+### Q: Плюсы и минусы СИНГЛТОН ?
+
+- (+) Класс сам контролирует процесс создания единственного экземпляра.
+- (+) Паттерн легко адаптировать для создания нужного числа экземпляров.
+- (+) Возможность создания объектов классов, производных от Singleton.
+
+- (-) В случае использования в нескольких потоках и нескольких взаимозависимых одиночек их реализация может резко усложниться.
+
+### Q: Проблемы которые решает СИНГЛТОН ?
+
+Проблема: В многопоточном приложении одновременно 2 или более потоков захотят вызвать функцию получения объекта синглтона с одним и тем же типом T?
+
+https://habr.com/ru/post/150276/
+
+1. Старый стандарт $6.7.4, C++03 - опускал какую либо информацию о многотопоточности при процессе инициализации объектов.
+2. Новый стандарт  $6.7.4, C++11 - говорит о том, что если во время инициализации переменной (т.е. создания экземпляра) второй поток пытается получить доступ к этой же переменной, то он (поток) должен ожидать завершения инициализации, при этом реализация не должна допускать ситуации deadlock.
+
+Вопрос остётся открытым лишь в том смысле - какие компиляторы действительно поддерживают новый стандарт, а какие лишь пытаются делать вид, что поддерживают. Что стоит проверять лишь экспериментально.
+
+- (+) Ожидание (Как должно работать): Синглтон инициализируется только один раз и функция threadFunction завершает свою работу только после завершения инициализации синглтона => корректная инициализация объекта в многопоточном окружении.
+- (-) Ошибка  (Негативный результат): Компилятор для первого потока начинает инициализировать синглтон, а для остальных — возвращает сразу объект, который даже не успел проинициализироваться => правильная работа в многопоточной среде может быть не обесепчена.
+
+1. Улучшение - через mutex:
+- перед созданием объекта мы будем использовать мьютекс для синхронизации доступа к объекту:
+- (+) избавляет от проблемы возвращения неинициализированного объекта: перед началом инициализации вызывается mutex.lock(), а после завершения инициализации вызывается mutex.unlock(). Остальные потоки ожидают завершения инициализации перед тем, как начать его использовать. 
+- (-) минус: блокировка используется всегда, вне зависимости от того, проинициализирован ли уже объект или нет. 
+
+2. Улучшение - через "Double-Checked Locking Pattern":
+- проверка условия: проинициализирован или нет? Если да — то сразу возвращаем ссылку на объект
+- берем блокировку
+- проверяем условие второй раз, если проинициализирован — то снимаем блокировку и возвращаем ссылку
+- проводим инициализацию синглтона
+- меняем условие на «проинициализирован»
+- снимаем блокировку и возвращаем ссылку
+
+3.1 Через класс SingletonDestroyer, для автоматического разрушения объекта Singleton.
+3.2 Использование нескольких взаимозависимых одиночек
+
+http://cpp-reference.ru/patterns/creational-patterns/singleton/
+
+### Q: Потокобезопасность Синглтона Мейерса / Майерса ?
+A: НЕ ПОТОКОБЕЗОПАСЕН - в его Традиционной реализации с отложенной инициализацией (lazy initialization). В современном C++11, этот паттерн считается ПОТОКОБЕЗОПАСНЫЙ, о чём написано в стандарте §6.7 [stmt.dcl] p4.
+
+https://habr.com/ru/post/150276/
+
+Из стандарта: If control enters the declaration concurrently while the variable is being initialized, the concurrent execution shall wait for completion of the initialization.
+
+- Visual Studio: supported since Visual Studio 2015
+- GCC: supported since GCC 4.3
+
+Ранее проблему решали с использованием метода "Double-Checked Locking" / "Double-Checked Locking Pattern", хоть он и был более затратен.
+По причине возникновения такого решения, синглтон с использованием "Double-Checked Locking" назвали Синглтон Дейкстры.
+
+```
+In C++03, this code wasn't thread safe. There is an article by Meyers called 
+"C++ and the Perils of Double-Checked Locking" which discusses thread safe 
+implementations of the pattern, and the conclusion is, more or less, that 
+(in C++03) full locking around the instantiating method is basically the 
+simplest way to ensure proper concurrency on all platforms, while most forms 
+of double-checked locking pattern variants may suffer from race conditions 
+on certain architectures, unless instructions are interleaved with 
+strategically places memory barriers.
+```
+
+### Q: Синглтон (небезопасный в многопоточном окружении) КОД
+```
+template<typename T>
+T& single()
+{
+    static T t;
+    return t;
+}
+```
+
+### Q: Синглтон Класс (небезопасный в многопоточном окружении)
+```
+// Singleton.h
+class Singleton
+{
+  private:
+    static Singleton * p_instance;
+    // Конструкторы и оператор присваивания недоступны клиентам
+    Singleton() {}
+    Singleton( const Singleton& );  
+    Singleton& operator=( Singleton& );
+  public:
+    static Singleton * getInstance() {
+        if(!p_instance)           
+            p_instance = new Singleton();
+        return p_instance;
+    }
+};
+  
+// Singleton.cpp
+#include "Singleton.h"
+  
+Singleton* Singleton::p_instance = 0;
+```
+
+### Q: Синглтон Мейерса / Майерса (небезопасный в многопоточном окружении) КОД 
+```
+// Singleton.h
+class Singleton
+{
+private: 
+    Singleton() {}
+    Singleton( const Singleton&);  
+    Singleton& operator=( Singleton& );
+public:
+    static Singleton& getInstance() {
+        static Singleton  instance;
+        return instance;
+    }    
+}; 
+```
+
+### Q: Синглтон  DCLP (Double-Checked Locking Pattern) КОД
+```
+// небезопасная функция в многопоточном окружении
+template<typename T>
+T& singleUnsafe()
+{
+    static T t;
+    return t;
+}
+
+// функция для использования в многопоточном окружении
+template<typename T>
+T& single()
+{
+	static T* volatile pt;
+	if (pt == 0)
+	{
+		T* tmp;
+		{
+			StaticLock lock;
+			tmp = &singleUnsafe<T>();
+		}
+		pt = tmp;
+	}
+	return *pt;
+}
+```
+### Q: Синглтон Мейерса / Майерса КОД
+
+// TO DO
+
+### Q: Синглтон Дейкстры КОД
+
+// TO DO
+
+### Q: Синглтон Александреску КОД
+
+// TO DO
+
+
