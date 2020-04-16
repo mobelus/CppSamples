@@ -10,7 +10,7 @@ Small cpp Examples
 
 https://www.tutorialspoint.com/cplusplus/cpp_questions_answers.htm
 
-C++ Interview Questions 
+C++ Questions 
 
 https://www.tutorialspoint.com/cplusplus/cpp_interview_questions.htm
 
@@ -2608,6 +2608,32 @@ int main()
 ```
 
 
+
+# QT questions
+
+http://www.qtcentre.org/threads/38448-QT-related-interview-questions
+
+- How qt differs from other mobile development platforms like android?
+- If worked with GTK what is the d+ifference between QT and GTK?
+- What are the striking futures of QT?
+- What is Qpointer?
+- What is dpointer?
+- What is MVC architecture? How it is organized?
+- What is a signal? And how will it differ from event?
+- What is a slot? And how it differs with callback Method?
+- What is the difference between signal and slot mechanism and Callback mechanism of GTK?
+- How many signals at maximum you can connect to a single slot? If more than one how you can do that?
+- How many slots can you connect to a signal? If more than one how those slots will be executed? 
+(The order of execution)
+- What is QCast and how will it differ compared to c++’s dynamic cast?
+- What is the use of Q_OBJECT macro?
+- What is MOC and UIC? Explain how they will work for compilation in QT?
+- What is qmake? (Explain the usage of it)
+- How a QT Program/Application written for one platform (Symbian) can be ported/executed in another 
+platform (Maemo)? (Explain If you need to make any changes or you need to recompile)
+- What are all the platforms/OS currently QT supports?
+
+
 # F2FA1C23-2E60-4135-91D3-193007215549
 
 ### Q: Шпаргалка по QT !
@@ -2753,8 +2779,6 @@ postEvent() posts the event on a queue for later dispatch.
 ### Q: Как работают события в QT ?
 
 // TO DO
-
-
 
 ### Q: Что такое сигнал ?
 
@@ -3170,35 +3194,32 @@ h: Q_INVOCABLE function_name();
 
 - Второй Вариант
 
-...
-
-...
-
-	class TestClass : public QObject
-	{
-		Q_OBJECT
-			Q_PROPERTY(int someProperty READ getSomeProperty WRITE setSomeProperty NOTIFY somePropertyChanged)
-	public:
-		explicit TestClass(QObject *parent = 0);
-		int getSomeProperty()const;
-		void setSomeProperty(const int &);
-	private:
-		int someProperty;
-	signals:
-		void somePropertyChanged();
-		public slots:
-	};
-	int TestClass::getSomeProperty()const
-	{
-		qDebug() << "I'm getter";
-		return someProperty;
-	}
-	void TestClass::setSomeProperty(const int &i)
-	{
-		qDebug() << "I'm setter";
-		someProperty = i;
-	}
-	
+```
+class TestClass : public QObject
+{
+	Q_OBJECT
+		Q_PROPERTY(int someProperty READ getSomeProperty WRITE setSomeProperty NOTIFY somePropertyChanged)
+public:
+	explicit TestClass(QObject *parent = 0);
+	int getSomeProperty()const;
+	void setSomeProperty(const int &);
+private:
+	int someProperty;
+signals:
+	void somePropertyChanged();
+	public slots:
+};
+int TestClass::getSomeProperty()const
+{
+	qDebug() << "I'm getter";
+	return someProperty;
+}
+void TestClass::setSomeProperty(const int &i)
+{
+	qDebug() << "I'm setter";
+	someProperty = i;
+}
+```
 
 - emit - используется для высылки SIGNAL-а.
 #### - SLOT (по умолчанию private)
