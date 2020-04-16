@@ -3652,3 +3652,24 @@ public boolean permutation(String s, String t) {
 }
 ```
 
+# Как в QML нарисовать Круг
+
+1. Ректангл с половинным радиусом. Rectangle { width: 10; height: width; radius: width/2; }
+2. На Канвасе нарисовать по точкам: Canvas c использованием Context2D:
+```
+Rectangle { Canvas { anchors.fill: parent onPaint: {
+var ctx = getContext("2d"); ctx.beginPath();ctx.moveTo(centreX, centreY); ctx.arc();
+```
+3. Шейпы (Shapes) и в них используем Arc-и. Можно один ShapePath с двумя или одним PathArc - https://doc.qt.io/qt-5/qml-qtquick-shapes-shape.html
+Пример: https://www.qt.io/blog/2017/07/07/let-there-be-shapes
+4. Qml + QPainter - наследуемся от QQuickPaintedItem, переопределяем paint()
+```
+#include <QtQuick/QQuickPaintedItem> 
+class PieChart : public QQuickPaintedItem    
+{ public: void paint(QPainter *painter); };
+Source:
+void PieChart::paint(QPainter *painter)
+{ QPen pen(m_color, 2); painter->setPen(pen); ... }
+```
+5. 
+6. 
