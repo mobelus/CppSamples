@@ -3671,5 +3671,5 @@ Source:
 void PieChart::paint(QPainter *painter)
 { QPen pen(m_color, 2); painter->setPen(pen); ... }
 ```
-5. 
-6. 
+5. Какими-нибудь средствами OpenGL
+6. ???
