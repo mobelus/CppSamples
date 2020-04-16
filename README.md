@@ -98,8 +98,8 @@ bool compareFunc(const Param& lhs, const Param& rhs)
 ```
 
 
-### MUTABLE Relevant example (mutable mutex)
-
+### MUTABLE Relevant example (mutable mutex) / MUTABLE пример использования на практике
+Ответ: mutable mutex при работе с const-тантными get-методами.
 ```
 class MyClass : public QObject
 {
@@ -126,7 +126,7 @@ state MyClass::getState() const
 ```
 
 
-### Initialization over constructor with parameters
+### Initialization over constructor with parameters / Инициализация через конструктор с параметрами
 
 - Allows to write less code inside the body of the function
 - const variables can be initialized in constructor and not inside the body of the class
@@ -182,7 +182,6 @@ private:
 ### Lambda
 
 ```
-
 [=](float a, float b) {
             return (std::abs(a) < std::abs(b));
         } // end of lambda expression
@@ -202,7 +201,6 @@ private:
 [this&](float a, float b) {
             return (std::abs(a) < std::abs(b));
         } // end of lambda expression
-
 ```
 
 + ЗАМЫКАНИЯ
@@ -232,74 +230,72 @@ https://github.com/tumagonx/portabat
 #include <iostream>
 #include <sstream>
 
+unsigned int random_char()
+{
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, 255);
+  return dis(gen);
+}
 
-		unsigned int random_char()
-		{
-			std::random_device rd;
-			std::mt19937 gen(rd());
-			std::uniform_int_distribution<> dis(0, 255);
-			return dis(gen);
-		}
+std::string generate_hex(const unsigned int len)
+{
+  std::stringstream ss;
+  for (unsigned int i = 0; i < len; i++)
+  {
+  	const auto rc = random_char();
+  	std::stringstream hexstream;
+  	hexstream << std::hex << rc;
+  	auto hex = hexstream.str();
+  	ss << (hex.length() < 2 ? '0' + hex : hex);
+  }
+  return ss.str();
+}
 
-		std::string generate_hex(const unsigned int len)
-		{
-			std::stringstream ss;
-			for (unsigned int i = 0; i < len; i++)
-			{
-				const auto rc = random_char();
-				std::stringstream hexstream;
-				hexstream << std::hex << rc;
-				auto hex = hexstream.str();
-				ss << (hex.length() < 2 ? '0' + hex : hex);
-			}
-			return ss.str();
-		}
+void toUpper(std::string& s)
+{
+  std::transform(s.begin(), s.end(), s.begin(), toupper);
+}
 
-		void toUpper(std::string& s)
-		{
-			std::transform(s.begin(), s.end(), s.begin(), toupper);
-		}
+void toLower(std::string& s)
+{
+  std::transform(s.begin(), s.end(), s.begin(), tolower);
+}
 
-		void toLower(std::string& s)
-		{
-			std::transform(s.begin(), s.end(), s.begin(), tolower);
-		}
-
-		std::string uuidStdGenerate()
-		{
-			std::string strUUID = generate_hex(32 / 2);
-			toUpper(strUUID);
-			return strUUID;
-		}
+std::string uuidStdGenerate()
+{
+  std::string strUUID = generate_hex(32 / 2);
+  toUpper(strUUID);
+  return strUUID;
+}
 ```
 
 # Debug stuff by writing to a file with QT
 
 ```
-	
-	QString filename = "C:\\folder\\test.txt";
-	QFile inFile(filename);
-	inFile.open(QIODevice::ReadOnly | QIODevice::Text);
-	QByteArray inputData = inFile.readAll();
-	inFile.close();
+QString filename = "C:\\folder\\test.txt";
+QFile inFile(filename);
+inFile.open(QIODevice::ReadOnly | QIODevice::Text);
+QByteArray inputData = inFile.readAll();
+inFile.close();
 
-	QFile file(filename);
-	file.open(QIODevice::WriteOnly);
-	QTextStream out(&file);
-	out << inputData;
-	out << "Thomas M. Disch: " << 334 << endl;
-	file.close();
+QFile file(filename);
+file.open(QIODevice::WriteOnly);
+QTextStream out(&file);
+out << inputData;
+out << "Thomas M. Disch: " << 334 << endl;
+file.close();
 
-	/*
-		QFile _file(filename);
-		_file.cre
-		QTextStream out(&_file);
-		QString str = "123\n";
-		out << str << endl;
-	*/
+/*
+QFile _file(filename);
+_file.cre
+QTextStream out(&_file);
+QString str = "123\n";
+out << str << endl;
+*/
 ```
 
-# Виртуальные функции и деструктор
+# Виртуальные функции и конструктор / деструктор
 
 - Вритуальные методы в Конструкторе
 При вызове виртуальных методов из коснутруктора используется **ПОЗДНЕЕ СВЯЗЫВАНИЕ**, как следствие мы не сможем вызвать . 
@@ -325,20 +321,6 @@ https://habr.com/ru/post/64280/
 
 https://pro-prof.com/forums/topic/constructor_destructor_exceptions
 
-
-# lvalue и rvalue
-
-- Lvalue (locator value) представляет собой объект, который занимает идентифицируемое место в памяти (например, имеет адрес).
-
-int var;
-var = 4;
-
-- Rvalue (locator value) это выражение, которое не представляет собой объект, который занимает идентифицируемое место в памяти. (оно, не имеет адрес).
-
-4 = var;       // ERROR!
-(var + 1) = 4; // ERROR!
-
-https://habr.com/ru/post/348198/
 
 # Copy Constructor
 
