@@ -2615,8 +2615,20 @@ http://www.qtcentre.org/threads/38448-QT-related-interview-questions
 platform (Maemo)? (Explain If you need to make any changes or you need to recompile)
 - What are all the platforms/OS currently QT supports?
 
+### Q. What is a signal? And how will it differ from event?
+Что такое СИГНАЛЫ: События, которые могут обрабатываться НЕ лишь одним методом, а многими методами, тоесть слотами
 
-# F2FA1C23-2E60-4135-91D3-193007215549
+Event - происходит один раз и завязан на одну обработку
+
+### Q. What is a slot? And how it differs with callback Method?
+Что такое СЛОТЫ: методы, которые мы "соединяем" с сигналами или (событиями), чтобы эти методы были выполнены в момент настцпления (emit) вызова / срабатывания события/сигнала
+
+callback методы - просто указатели на функцию, по которым происходит её вызов.
+
+### Q. What is the difference between signal and slot mechanism and Callback mechanism of GTK?
+
+
+# UUID F2FA1C23-2E60-4135-91D3-193007215549
 
 ### Q: Шпаргалка по QT !
 http://cppstudio.com/post/11167/
