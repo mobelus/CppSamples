@@ -3671,5 +3671,6 @@ Source:
 void PieChart::paint(QPainter *painter)
 { QPen pen(m_color, 2); painter->setPen(pen); ... }
 ```
-5. Какими-нибудь средствами OpenGL
-6. ???
+5. QML Scene Graph framework class MyCircle : public QQuickPaintedItem
+https://doc.qt.io/qt-5/qtquick-customitems-painteditem-example.html
+6. Какими-нибудь средствами OpenGL
