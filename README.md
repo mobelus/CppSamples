@@ -2589,7 +2589,509 @@ int main()
 
 ```
 
+# QT Все ответы на все вопросы:
 
+http://clinuxcode.blogspot.com/2016/09/frequently-asked-questions-in-qt.html
+```
+Q) What is Qt?
+Qt is a Framework that comprises of several classes that form the Qt object model. The root of this model is the QObject class. Basically all Qt objects inherit from the QObject class. Having inherited from this class, it means all Qt Objects inherit a particular behavior and we can exploit this in order to manage memory.
+Q) How qt differs from other mobile development platforms like android?
+i)Qt is platform independent- same source code can be used for development for multiple environment with no or very less code change. Android can be used in android environment only.
+ii)Language independent- For development in Qt many languages like C++,C#,Java can be used. But in android Java is used.
+Q) What are the striking features of QT?
+Qt is cross platform application development framework using which application can be developed for different platform with no very less change in codebase.
+Few features are:
+Signal slots, moc, Qt D-bus,QtCore,QtWidget,QtGui,QML,QtMultimedia,Qt Network, Qt SQL, Qt xml.
+Q) What is Qpointer?
+QPointer:
+It will be automatically set to nullptr if the pointed to object is destroyed. It is a weak pointer specialized for QObject.QPointer can only point to QObject instances.
+You would normally use QPointer in a situation where the pointer is being created outside of a QObject class such as in the main function or other none Qt based classes you may have created in your code.
+The QPointer is a template class that wraps obj as a pointer to MyObject. You will notice that there is no star to mark it as a pointer because QPointer abstracts all that. It does not just stop there but it also deals with dynamically destroying the obj pointer should there no longer be any references to it.
+
+There you have it. A simple and safer way to use pointers and to manage your memory when programming in Qt C++.
+
+Consider this fragment:
+
+QObject *obj = new QObject;
+QPointer<QObject> pObj(obj);
+delete obj;
+Q_ASSERT(pObj.isNull()); // pObj will be nullptr now
+
+QSharedPointer
+A reference-counted pointer. The actual object will only be deleted, when all shared pointers are destroyed. Equivalent to std::shared_ptr.
+
+int *pI = new int;
+QSharedPointer<int> pI1(pI);
+QSharedPointer<int> pI2 = pI1;
+pI1.clear();
+// pI2 is still pointing to pI, so it is not deleted
+pI2.clear();
+// No shared pointers anymore, pI is deleted
+
+Note that as long there is a shared pointer, the object is not deleted!
+
+QWeakPointer:
+Can hold a weak reference to a shared pointer. It will not prevent the object from being destroyed, and is simply reset. Equivalent to std::weak_ptr, where lock is equivalent to toStrongRef.
+
+int *pI = new int;
+QSharedPointer<int> pI1(pI);
+QWeakPointer<int> pI2 = pI1;
+pI1.clear();
+// No shared pointers anymore, pI is deleted
+//
+// To use the shared pointer, we must "lock" it for use:
+QSharedPointer<int> pI2_locked = pI2.toStrongRef();
+Q_ASSERT(pI2_locked.isNull());
+
+This can be used if you need access to an object that is controlled by another module.
+
+To use a weak pointer, you must convert it to a QSharedPointer. You should never base a decision on the weak pointer being valid. You can only use data() of isNull to determine that the pointer is null.
+Q) What is dpointer?
+The d-pointer
+The trick is to keep the size of all public classes of a library constant by only storing a single pointer. This pointer points to a private/internal data structure that contains all the data. The size of this internal structure can shrink or grow without having any side-effect on the application because the pointer is accessed only in the library code and from the application's point of view the size of the object never changes - it's always the size of the pointer. This pointer is called the d-pointer.
+Q) What is MVC architecture? How it is organized?
+MVC consists of three kinds of objects.
+Model is the application object,
+View is its screen presentation, and the
+Controller defines the way the user interface reacts to user input.
+Before MVC, user interface designs tended to lump these objects together. MVC decouples them to increase flexibility and reuse.
+Model/view architecture to manage the relationship between data and the way it is presented to the user.
+Q) What is a signal? And how will it differ from event?
+Signal is emitted when a particular event occurs. Qt's widgets have many predefined signals, but we can always subclass widgets to add our own signals to them.
+signals: /* signals must be declared under 'signals:' or “ Q_SIGNALS:” access specifier */
+void foo(); /* This is a signal declaration -- a pure declaration as a method.*/
+Before Qt5 signals were protected so that only same class objects acan emit it.
+From Qt5 onwards signals are public and to make it private need to declare QPrivateSignal dummy (empty) struct private in the Q_OBJECT macro.
+
+In Qt, events are objects, derived from the abstract QEvent class, that represent things that have happened either within an application or as a result of outside activity that the application needs to know about. Events can be received and handled by any instance of a QObject subclass, but they are especially relevant to widgets. This document describes how events are delivered and handled in a typical application. in general an event will be generated by an outside entity (e.g. Keyboard, Mouswheel) and will be delivered through the event loop in QApplication.
+
+Signals and Slots are a convenient way for QObjects to communicate with one another and are more similar to callback functions. In most circumstances, when a "signal" is emitted, any slot function connected to it is called directly. The exception is when signals and slots cross thread boundaries. In this case, the signal will essentially be converted into an event.
+
+Q) What is a slot? And how it differs with callback Method?
+Slots are normal C++ member functions and can be called normally; their only special feature is that signals can be connected to them. A slot is called when a signal connected to it is emitted. We can also define slots to be virtual.
+
+Callbacks have two fundamental flaws: Firstly, they are not type-safe. We can never be certain that the processing function will call the callback with the correct arguments. Secondly, the callback is strongly coupled to the processing function since the processing function must know which callback to call.
+
+Q) How many signals at maximum you can connect to a single slot? If more than one how you can do that?
+Surely we can connect more than one signal to a single slot. The single slot is called whenever one of those connected signal is emmitted.
+Even one signal can be coonected to another signal, which are then emitted automatically whenever the source signal is emitted. Definition for signals are genereated in by moc in code generated by moc.
+Q) How many slots can you connect to a signal? If more than one how those slots will be executed?
+(The order of execution).
+Surely more than on slot can be connected to a single signal. Then Slots are called in the order they are connected when the signal is emmitted.
+Q) What is QCast and how will it differ compared to c++’s dynamic cast?
+qobject_cast function is used to convert polymorphic pointers on qobject classes.
+qobject_cast does not reauire the support for rri while dynamic_cast requires to enable rtti.
+Similar to dyanimc_cast it returns a non zero pointer on success ad 0 on failure.
+
+For example,
+let's assume MyWidget inherits from QWidget and is declared with the Q_OBJECT macro:
+class MyWidget: public Qwidget
+{
+QObject *obj = new MyWidget;
+...
+};
+The cast from QObject to QWidget must be successful, because the object obj is actually a MyWidget, which is a subclass of QWidget.
+
+QWidget *widget = qobject_cast<QWidget *>(obj);
+
+The cast from QObject to QWidget is successful, because the object is actually a MyWidget, which is a subclass of QWidget. Since we know that obj is a MyWidget, we can also cast it to MyWidget.
+
+Q) What is the use of Q_OBJECT macro?
+OBJECT simply tells the pre-compiler that this class has gui elements and needs to be run through the 'moc' . In turn moc generates definitions for member variables and functions that Q_OBJECT has declared. moc produces a C++ source file containing the meta-object code for those classes which declare Q_OBJECT and derived from QOBJECT or wants to use signal slot or wants to use qobject_cast.
+The Q_OBJECT macro must appear in every class that derives from QObject or which wants to use signal slot mechanism, that want to use qobject_cast.
+
+Q) What is MOC and UIC? Explain how they will work for compilation in QT?
+The Meta-Object Compiler, moc, is the program that handles Qt's C++ extensions.
+The moc tool reads a C++ header file. If it finds one or more class declarations that contain the Q_OBJECT macro, it produces a C++ source file containing the meta-object code for those classes. Among other things, meta-object code is required for the signals and slots mechanism, the run-time type information qobject_cast, and the dynamic property system.
+Q) What is qmake? (Explain the usage of it)
+Q) How a QT Program/Application written for one platform (Symbian) can be ported/executed in another
+platform (Maemo)? (Explain If you need to make any changes or you need to recompile)
+Q) What are all the platforms/OS currently QT supports?
+Q) What is event loop in Qt?
+18) How to design your own widget in Qt?
+1).Signal/slot mechanism is synchronous or not? If it is,that means we should not let a slot do much work,otherwise the UI will be blocked for much time.?
+Usually, slots are synchronous. Starting with Qt4, you can send signals across threads. If you execute a slot in another thread, you will get an asynchronous slot.
+2).QEvent is asynchronous or not? For example ,if I call the update() function,the paintEvent() will be called, if it is asychronous,the UI will not be blocked.?
+QEvents are syncronous but you can also deliver events in different slots. With Qt3, this was the only option to invoke something in a different thread.
+3).Is there any relationship between signal/slot and event? Does Qt put the slots into event queue?
+With Qt4, you can tell Qt to post signals in the event queue using the 5th argument of the connect-method.
+1)Memory leak?
+Memory leaks occur when pointers referencing a certain chunk of memory goes out of scope and therefore the pointer is lost but the content that the pointer was referencing is still lying in the heap. A pointer would normally go out of scope when an execution block ends and returns and the pointer created within that scope is not destroyed along with the referenced data. This can also occur when an exception is thrown or when any sort of error stops execution before the pointer is destroyed.
+Qpointer is used in Qt framework to avoid such scenarios.
+
+QPointer – This tracks the lifetime of an instance of QObject.
+QSharedPointer, QWeakPointer – These are thread-safe sharing pointers, similar to C++11’s std::shared_ptr. QWeakPointer use has been deprecated unless used with QSharedPointer.
+QScopedPointer, QScopedPointerArray – These are none shared pointers Ideal for Resource Acquisition Is Initialization (RAII) usage whereby they take ownership of a pointer and ensures it is properly deleted at the end of the scope.
+
+Q ) What is D-Bus?
+D-bus is inter process communication mechanism using which applications can communicate to each other.
+Using dbus an application exposes its services with adapters.
+Another application can use the services of other application using proxy by making it d-bus enabled.
+Q) What is a System Bus?
+Generally system bus starts with system's startup level.
+Mainly used with hardwares events(like keyboard press or mouse click).
+Event/interrupts/signals are signals from hw/sw to os/processor that it requirs quick attention from os/processor.
+Q) What is a Session Bus?
+Generally session bus starts when a user logins to desktop.
+Mainly used for desktop applications to connect to each other.
+Q) What is the syntax of a dbus?
+Application one that exposes its services (say test()) creates xml using cpp2xml tool then creates adapter and proxy using xmltocpp tool and finally include adapter, registerService and registerObject.
+new MainWindowAdaptor(&w);
+QDBusConnection connection1 = QDBusConnection::sessionBus();
+connection1.registerService("com.testServiceName");
+connection1.registerObject("/testObjectPath",&w);
+Another applicationTwo which wants to call services/methods exposed by the applicationOne include proxy, create proxy object and call the remote function on proxy object and in turn actual function in remote applicationOne gets called.
+MyInterfaceClass * m_window = new MyInterfaceClass("com.testServiceName","/testObjectPath",QDBusConnection::sessionBus(),0);
+
+Then call the function “test()” on remote application using local proxy objext as
+m_window->test("via setParent");
+
+Note:instead of 0 specific methods can be given.
+
+Q) How to debug if a connect fails?
+Check that classes using signals and slots inherit QObject or a QObject subclass.
+Make sure the Q_OBJECT macro is inserted at the beginning of your class declaration.
+If you use custom signals, check that these are declared correctly, with a void return type, in the public/protected/private signals section of your class declaration.
+Make sure that your slot function is declared as a slot, e.g. private slots not private.
+Put all connect statements before functions calls
+Check the return value of the connect statement: connect returns true if it successfully connects the signal to the slot.
+Use QErrorMessage::qtHandler() or qInstallMsgHandler() to view connect error warnings.
+Put qDebug to check signal slots are called.
+Check the compiler warnings.
+Q) Can we give definition to user defined signal?
+No, it will be a redefinition linker error because definition of signal is given in moc code.
+Q) Can we connect a signal with another signal?
+Yes, as both ara functions.
+Example suppose a library code writeCode() emits a signal writeCompleted.
+If another code say writeSocket uses the writeCode. On completion it emits another signal say writeSocketCompleted. So we can connect the signal writeSocketCompleted with writeCompleted.(without changing the library code)
+Q) can slot have lesser arguments than signal? Yes
+The signature of a signal must match the signature of the receiving slot. (In fact a slot may have a shorter signature than the signal it receives because it can ignore extra arguments.)
+This means that a signal of the form
+signal(int, int, QString)
+can only be connected with slots with the following signatures
+slot1(int, int, QString)
+slot2(int, int)
+slot3(int)
+slot4()
+Q) can we overload function on basis of extern?
+No, redefinition.
+Q) Why multithreading is used?
+1) efficient program to make best use of cpu cycles.
+2) handling event driven code in ntworked, gui based, distributed code.
+3) threads does not required ipc(like pipe,fifo,socket used in processes to communicate).
+4)since threads run on the same address space of process so fast to create.
+5) concurrent programming.
+
+Q) How to use thread in Qt. Two ways?
+1) creating a sub-class of QThread and implementing the run method then create object of this class and call start on that. Its old style like in java.
+class SampleThread : public QThread
+{
+Q_OBJECT
+protected:
+virtual void run()
+{
+// do some work
+qDebug() << "Hello from SampleThread: Thread Id:" << QThread::currentThreadId();
+// Enters the main event loop and waits until exit() is called.
+exec();
+}
+};
+SampleThread aThread;
+// start thread
+aThread.start();
+// check if thread running, returns true
+qDebug()<< "thread running " << aThread.isRunning();
+// check if thread finished, returns false
+qDebug()<< "thread finished" << aThread.isFinished();
+// terminate thread and wait for termination
+aThread.quit();
+aThread.wait();
+// check if thread running, returns false
+qDebug()<< "thread running " << aThread.isRunning();
+// check if thread finished, returns true
+qDebug()<< "thread finished" << aThread.isFinished();
+
+Qii) can thread be connected to slots? Yes.
+#include <QtCore>
+class Thread : public QThread
+{
+private:
+void run()
+{
+qDebug()<<"From worker thread: "<<currentThreadId();
+}
+};
+
+int main(int argc, char *argv[])
+{
+QCoreApplication a(argc, argv);
+qDebug()<<"From main thread: "<<QThread::currentThreadId();
+
+Thread t;
+QObject::connect(&t, SIGNAL(finished()), &a, SLOT(quit()));
+
+t.start(); //start() calls the run() which is the entry point for a thread.
+return a.exec();
+}
+/*output:
+From main thread: 0x15a8
+From worker thread: 0x128c
+*/
+
+
+
+
+2)Second way or new way of creating thread. more elegant way.
+Subclass QThread and reimplement its run() function is intuitive and there are still many perfectly valid reasons to subclass QThread, but when event loop is used in worker thread, it's not easy to do it in the subclassing way.
+Use worker objects by moving them to the thread is easy to use when event loop exists, as it has hidden the details of event loop and queued connection.
+
+Thread affinity was introduced at the base level of QObject, which is the base object for nearly all Qt related classes.
+Signal and slot connections can now be used between objects of different thread affinity.
+3. QThread gained a default run implementation.
+
+Example:
+Usage 2-0
+
+If we only want to make use of QThread::exec(), which has been called by QThread::run() by default, there will be no need to subclass the QThread any more.
+Steps:
+Create a Worker object
+Do signal and slot connections
+Move the Worker object to a sub-thread
+Start thread
+
+#include <QtCore>
+
+class Worker : public QObject
+{
+Q_OBJECT
+private slots:
+void onTimeout()
+{
+qDebug()<<"Worker::onTimeout get called from?: "<<QThread::currentThreadId();
+}
+};
+
+#include "main.moc"
+int main(int argc, char *argv[])
+{
+QCoreApplication a(argc, argv);
+qDebug()<<"From main thread: "<<QThread::currentThreadId();
+
+QThread t;
+QTimer timer;
+Worker worker;
+
+QObject::connect(&timer, SIGNAL(timeout()), &worker, SLOT(onTimeout()));
+timer.start(1000); //start() calls Qthread::run() which is the entry point for thread.
+
+//timer.moveToThread(&t);
+worker.moveToThread(&t);
+
+t.start();
+
+return a.exec();
+}
+
+/*
+The result is:As expected, the slot doesn't run in the main thread.
+From main thread: 0x1310
+Worker::onTimeout get called from?: 0x121c
+Worker::onTimeout get called from?: 0x121c
+Worker::onTimeout get called from?: 0x121c
+*/
+Q) Command to count characters without opening it?
+/prac$ wc -m < test.txt
+29
+test.txt contains: 29 characters including spaces and \0
+
+
+Casting:
+1) reinterpret_cast: used for i) casting between pointers of unrelated classes. ii) for ptr to int type cast.
+2) const_cast: used to remove constantness.
+3) dynamic_cast: is used to perform safe downcasting. Base ptr to derived class pointer.
+4)static_cast: for implicit type conversions
+i)non-const object to const,
+ii) int to double.
+iii) void* pointers to typed pointers,
+iv)base pointers to derived pointers.
+But it cannot cast from const to non-const object. This can only be done by const_cast operator.
+
+
+1)
+#include <iostream>
+using namespace std;
+
+struct data {
+short a;
+short b;
+};
+
+int main () {
+long value = 0xA2345678;
+data* pdata = reinterpret_cast<data*> (&value;);
+cout << pdata->a << endl;
+return 0;
+}
+Output on my machine: 22136 which is 2 bytes of value.
+
+Another example might be:
+
+class A {};
+class B {};
+
+int main()
+{
+A * pA = new A;
+B * pB = reinterpret_cast<B*>(pA);
+}
+```
+
+# QML все ответы на все вопросы
+
+http://clinuxcode.blogspot.com/2016/10/what-are-qml-faq-in-interviews.html
+
+Q) What is Qml ?
+QML is the name of the language (just like C++, which is another language...)
+QML stands for Qt Meta Language or Qt Modelling Language is a user interface markup language.
+Q) How to call c++ call from QML?
+QML call C + + methods with the Qt meta-object system. Like below:
+onClicked: parent.color = parent.randomColor ()
+
+Q) What are Four ways of integreting C++ with Qml?
+Subclassing QQuickItem: QQuickItem allows you to write your own visual and non-visual QML items using C++.
+Registering C++ types with QML: C++ classes can be registered with the QML type system, allowing them to be instantiated as QML types.
+Registering Context Properties: QObjects can be registered with the QML context, allowing their properties to be directly accessed.
+Accessing QML objects through the QML object tree: All QML objects reside in a tree hierarchy and can be accessed via the root of the tree.
+http://www.ics.com/blog/multilayered-architecture-qt-quick
+
+Q) How to call a C++ function from a qml?
+Through setcontext property.
+Note
+Loading a main.qml with a simple Item as the root type through the QmlApplicationEngine will not show anything on your display, as it requires a window to manage a surface for rendering. The engine is capable of loading qml code which does not contain any user interface (e.g plain objects). Because of this it does not create a window for you by default.
+The qmlscene or the new qml runtime will internally first check if the main qml file contains a window as a root item and if not create one for you and set the root item as a child to the newly created window.
+
+Q)What is Q_INVOKABLE?
+Add callable methods using Q_INVOKABLE or Qt slots, and connect to Qt signals with an onSignal syntax
+
+Q)How to call a QML function from c++?
+QML functions can be called from C++ and vice-versa.
+All QML functions are exposed to the meta-object system and can be called usingQMetaObject::invokeMethod(). Here is a C++ application that uses this to call a QML function:
+// MyItem.qml
+import QtQuick 1.0
+Item {
+    function myQmlFunction(msg) {
+        console.log("Got message:", msg)
+        return "some return value"
+    }
+}
+// main.cpp
+QDeclarativeEngine engine;
+QDeclarativeComponent component(&engine, "MyItem.qml");
+QObject *object = component.create();
+QVariant returnedValue;
+QVariant msg = "Hello from C++";
+QMetaObject::invokeMethod(object, "myQmlFunction",
+        Q_RETURN_ARG(QVariant, returnedValue),
+        Q_ARG(QVariant, msg));
+qDebug() << "QML function returned:" << returnedValue.toString();
+delete object;
+
+Q)How to call a C++ function from QML ?
+A C++ function can be called from a qml using set contextpropery in c++.
+http://doc.qt.io/qt-4.8/qtbinding.html
+All QML signals are automatically available to C++, and can be connected to using QObject::connect() like any ordinary Qt C++ signal.
+The signal is sent to QML, and the slot is invoked from QML.
+There are different ways to send signals from C++ to QML and back. In this article, we show how to do this by embedding a C++ class directly into QML. This has the advantage that no Qt::connect connections need to be set-up manually.
+In our example, we have a Receiver class that is implemented in C++.
+This class defines a signal sendToQml and a slot receiveFromQml.
+ Both have an integer parameter.
+The signal is sent to QML, and the slot is invoked from QML.
+Example:
+//signal_slot.pro
+TEMPLATE = app
+QT += qml quick
+#export QT_SELECT=5
+SOURCES += main.cpp \
+    receiver.cpp
+RESOURCES += qml.qrc
+# Additional import path used to resolve QML modules in Qt Creator's code model
+QML_IMPORT_PATH =
+# Default rules for deployment.
+include(deployment.pri)
+HEADERS += \
+    receiver.h
+//main.cpp
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include "receiver.h"
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+    Receiver receiver;
+    QQmlContext* ctx = engine.rootContext();
+    ctx->setContextProperty("receiver", &receiver);
+    engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
+    receiver.sendToQml(43);
+    //QDeclarativeView view;
+    //view.rootContext()->setContextProperty("_EBSCModel",m_EBSCDtcDataModel);
+    //sourcePath = "qrc:///DTC/qml/ITSDTC.qml";
+    //view.setSource(QUrl(sourcePath));
+    return app.exec();
+}
+//receiver.h
+#ifndef RECEIVER_H
+#define RECEIVER_H
+#include <QObject>
+class Receiver : public QObject
+{
+    Q_OBJECT
+public:
+    explicit Receiver(QObject *parent = 0);
+signals:
+    void sendToQml(int count);
+public slots:
+    void receiveFromQml(int count);
+};
+#endif // RECEIVER_H
+//receiver.cpp
+#include "receiver.h"
+#include <QDebug>
+Receiver::Receiver(QObject *parent) :
+   QObject(parent)
+{
+}
+
+void Receiver::receiveFromQml(int count) {
+    qDebug() << "Received in C++ from QML:" << count;
+}
+//main.qml
+import QtQuick 2.2
+import QtQuick.Window 2.1
+Window {
+    id: test
+    visible: true
+    width: 200
+    height: 50
+    Connections {
+        target: receiver
+        onSendToQml: {
+            console.log("Received in QML from C++: " + count)
+        }
+    }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            receiver.receiveFromQml(42);
+        }
+    }
+
+    Text {
+        text: qsTr("Press me to send a signal to C++")
+        anchors.centerIn: parent
+    }
+}
 
 # QT questions
 
@@ -2653,9 +3155,12 @@ https://habr.com/post/307816/
 - (+) боле легковестный
 - (-) он БЕЗ поддержки механизма сигналов и слотов
 - (-) можно использовать QMetaObject c некоторыми ограничениями, а именно:
-###### Q_ENUM
-###### Q_PROPERTY
-###### Q_INVOKABLE - Как плохая, но всё же альтернатива сигналам и слотам
+
+### Q_ENUM
+
+### Q_PROPERTY
+
+### Q_INVOKABLE - Как плохая, но всё же альтернатива сигналам и слотам
 
 ### What Are Limitations Of Moc?
 
@@ -2704,7 +3209,7 @@ https://www.opennet.ru/docs/RUS/qt3_prog/x3974.html
 
 Qt вызывает QApplication::notify(), чтобы передать событие приложению. Таким способом можно перехватить любое событие до того, как оно попадет в фильтр событий. Вообще фильтры событий более удобны, поскольку допускается одновременное существование любого количества фильтров, а функция notify() может быть только одна.
 
-- ** Event Handlers **
+- **Event Handlers**
 
 The normal way for an event to be delivered is by calling a virtual function.
 For example, QPaintEvent is delivered by calling QWidget::paintEvent().
@@ -2759,15 +3264,16 @@ bool FilterObject::eventFilter(QObject *object, QEvent *event)
 }
 ```
 
-- Sending Events
-```
+- **Sending Events**
+
 sendEvent() processes the event immediately. When it returns, the event filters and/or the object itself have already processed the event. For many event classes there is a function called isAccepted() that tells you whether the event was accepted or rejected by the last handler that was called.
+
 postEvent() posts the event on a queue for later dispatch.
-```
+
 
 ### Q: Разница между sendEvent() и postEvent() ?
 
-- sendEvent() - обрабатывает событие срезу, в обход очереди сообщений И она возвращает значение и фильтр или объект к этому времени уже обработали его. У некоторых классов есть isAccepted() был ли евент принят или отклонён обработчиком событий.
+- sendEvent() - обрабатывает событие сразу, в обход очереди сообщений И она возвращает значение и фильтр или объект к этому времени уже обработал его. У некоторых классов есть isAccepted() был ли евент принят или отклонён обработчиком событий.
 - postEvent() - ставит событие в очередь сообщений для последующей обработки.
 
 ### Q: Как работают события в QT ?
@@ -3161,15 +3667,15 @@ Qt::ConnectionType type = Qt::AutoConnection
 
 Qt поддерживает следующие типы соединений сигнал-слот:
 
-- Автоматическое соединение (Auto Connection) (именно оно выставлено 5-тым параметром у connect по умолчанию)
+- Автоматическое соединение **(Auto Connection)** (именно оно выставлено 5-тым параметром у connect по умолчанию)
 **Работает так**: идёт проверка находятся ли emit-ящий объект и объект слота в одном или в разных потоках, и принимается решение:
 1. Если источник и получатель находятся в ОДНОМ и том же потоке - определить поведение такое же, как и при DirectConnection (см ниже),  2. Если источник и получатель находятся в РАЗНЫХ потоках - определить поведение такое же, как и при QueuedConnection (см. ниже).
-- Прямое соединение (Direct Connection) Слот вызывается немедленно при отправке сигнала. Слот выполняется в потоке отправителя (в том потоке где был выполнен emit), который не обязательно является потоком-получателем. Это соединение ВСЕГДА исполняет ваш код внутри ОДНОГО потока, даже в случае, если вызываемый слот находится в другом. (Что может привести к проблемам)
-- Соединение через очередь сообщений (Queued Connection) Слот вызывается, когда управление возвращается в цикл обработки событий в потоке получателя. Слот выполняется в потоке получателя. Нюансы: Сигнал преобразуется в событие, и ставится в общую очередь или ЦИКЛ сообытий (event loop) в потоке получаетля для обработки. (В РАЗНЫХ потоках, имитированные сигналы не будут вызывать слот сразу, они будут помещены в цикл событий потока, и будут исполнены, когда придёт их очередь. НЮАНС имеется следующий, сигнал не сможет быть доставлен (соотвественно слот не сможет быть вызван), пока не закончится выполнение той функции, в которой был имитирован сигнал, то есть нельзя в случе Queued Connection, писать что-то типа while(true) { emit mySignal(); } )
-- Блокирующее соединение через очередь (Blocking Queued Connection) Слот вызывается так же, как и при соединении через очередь, за исключением того, что текущий поток блокируется до тех пор, пока слот не возвратит управление. Замечание: Использование этого типа подключения объектов в одном потоке приведет к взаимной блокировке.
-- Уникальное соединение (Unique Connection) Поведение такое же, что и при автоматическом соединении, но соединение устанавливается только если оно не дублирует уже существующее соединение. т.е., если тот же сигнал уже соединён с тем же самым слотом для той же пары объектов, то соединение не будет установлено и connect() вернет false.
+- Прямое соединение **(Direct Connection)** Слот вызывается немедленно при отправке сигнала. Слот выполняется в потоке отправителя (в том потоке где был выполнен emit), который не обязательно является потоком-получателем. Это соединение ВСЕГДА исполняет ваш код внутри ОДНОГО потока, даже в случае, если вызываемый слот находится в другом. (Фактически это прямой вызов колбэк функции в момент эмита сигнла - Что может привести к проблемам. Помните, что использование прямых соединений, когда отправитель и получатель "живут" в **разных** потоках, опасно в случае, если цикл обработки событий выполняется в потоке, где "живет" приемник, по той же самой причине, по которой небезопасен вызов функций объекта, принадлежащего другому потоку.)
+- Соединение через очередь сообщений **(Queued Connection)** Слот вызывается, когда управление возвращается в цикл обработки событий в потоке получателя. Слот выполняется в потоке получателя. Нюансы: Сигнал преобразуется в событие, и ставится в общую очередь или ЦИКЛ сообытий (event loop) в потоке получаетля для обработки. (В РАЗНЫХ потоках, имитированные сигналы не будут вызывать слот сразу, они будут помещены в цикл событий потока, и будут исполнены, когда придёт их очередь. НЮАНС имеется следующий, сигнал не сможет быть доставлен (соотвественно слот не сможет быть вызван), пока не закончится выполнение той функции, в которой был имитирован сигнал, то есть нельзя в случе Queued Connection, писать что-то типа while(true) { emit mySignal(); } )
+- Блокирующее соединение через очередь **(Blocking Queued Connection)** Слот вызывается так же, как и при соединении через очередь, за исключением того, что текущий поток блокируется до тех пор, пока слот не возвратит управление. Замечание: Использование этого типа подключения объектов в одном потоке приведет к взаимной блокировке.
+- Уникальное соединение **(Unique Connection)** Поведение такое же, что и при автоматическом соединении, но соединение устанавливается только если оно не дублирует уже существующее соединение. т.е., если тот же сигнал уже соединён с тем же самым слотом для той же пары объектов, то соединение не будет установлено и connect() вернет false.
 
-Эти типы соединений, передаются 5-тым аргументом в функцию connect(). Помните, что использование прямых соединений, когда отправитель и получатель "живут" в разных потоках, опасно в случае, если цикл обработки событий выполняется в потоке, где "живет" приемник, по той же самой причине, по которой небезопасен вызов функций объекта, принадлежащего другому потоку.
+Эти типы соединений, передаются 5-тым аргументом в функцию connect(). 
 
 - Ещё есть способ, чтобы заставить выполнение кода "прыгнуть" в выполнение слота в другом потоке, делается это через вызов метода:
 QMetaObject::invokeMethod( pointerToObject*, "functionName", Qt::QueuedConnection);
@@ -3178,6 +3684,11 @@ QObject::connect() сама по себе потокобезопасна.
 
 **СУТЬ:** Всё построена на QThread-ах, они начитнают своё выполнение после вызова фции run(). По умолчанию, run() запускает цикл сообщений (event loop), вызывая соотвественно exec() что и запускает Qt-шный цикл обработки сообщений (event loop) ынутри потока.
 Запуск собственного цикла обработки сообщений и дает возможность получать их в том числе и из других потоков. Фишка сигналов/слотов кьюта в том, что это еще и простая message queue система. Вызов в рамках одного потока - это прямой вызов подписанных слотов на этом же стеке, а вот QueuedConnection или межпоточные вызовы кладут в очередь соответствующего потока сообщение (эти сообщения лежат в одной очереди с сообщениями от ОС), и другой поток будет их извлекать в своём event-loop-е. Таким образом, вы просто просите другой поток вызвать слот, а вызовет он его когда в очередной раз будет отрабатывать цикл сообщений и он дойдет до сообщения о вызове слота.
+
+https://ru.stackoverflow.com/questions/758609/qt-%D0%BD%D0%B5-%D0%B2%D1%8B%D0%B7%D1%8B%D0%B2%D0%B0%D0%B5%D1%82%D1%81%D1%8F-%D1%81%D0%BB%D0%BE%D1%82-%D0%B2-%D0%B4%D1%80%D1%83%D0%B3%D0%BE%D0%BC-%D0%BF%D0%BE%D1%82%D0%BE%D0%BA%D0%B5#comment1174156_758616
+
+Запускаем QThread::start() поток. => начинается выполнение run(), Для того чтоб обрабатывать сообщения, внтури, нужно запустить QEventLoop::exec(). И далее как работают сигналы. В краце: Есть DirectConnection и QueuedConnection способы обработки сигнала, первый работает прямым вызовом колбэк функции в момент эмита сигнла, QueuedConnection отправляет служебное сообщение очередь потока к которому приписан объект и пока эта сообщение из очереди не будет обработано сигнал не дойдет до получателя. Для того чтоб обработать сообщение нужно создать QEventLoop объект (это и есть очередь) и вызвать exec() метод, это обработка сообщений. Когда ты запускаешь main, а внем QApplication::exec() Когда ты запускаешь main, а внем QApplication::exec() это и есть запуск QEventLoop объекта, который хранится в QApplication. Таким образом у тебя начинают работать сигналы отправленные через QueuedConnection, но только в главном потоке. Для других потоков надо делать все ручками
+
 
 https://stackoverflow.com/questions/38376840/qt-signals-and-slots-direct-connection-behaviour-in-application-with-a-single-th
 
@@ -3699,3 +4210,42 @@ void PieChart::paint(QPainter *painter)
 5. QML Scene Graph framework class MyCircle : public QQuickPaintedItem
 https://doc.qt.io/qt-5/qtquick-customitems-painteditem-example.html
 6. Какими-нибудь средствами OpenGL
+
+# Model-View в QML
+- ListModel
+- VisualItemModel
+- XmlListModel
+- FolderListModel
+- JavaScript-модели
+
+# C++-модель 
+- QAbstractItemModel
+Это стандартная модель из фреймворка Qt Model-View. Этот класс обладает богатыми возможностями и позволяет строить модели различной сложности.
+
+Существуют три базовых класса для таких моделей. 
+- QAbstractTableModel представляет данные в виде таблицы, для доступа к данным используется номер строки и столбца. 
+- QAbstractListModel представляет данные в виде списка и, можно сказать, является частным случаем предыдущей модели с одним столбцом.
+- QAbstractItemModel - наоборот, более обобщенная версия. Каждый элемент таблицы может иметь еще и дочерние элементы, тоже организованные в виде таблицы. Таким образом, при помощи этой таблицы можно организовать древовидную структуру. 
+
+- QFileSystemModel
+
+QSortFilterProxyModel, - Между моделью и представлением можно вставить специальную прокси-модель. Такие модели перехватывают вызовы к основной модели и могут скрывать определенные элементы, менять их порядок, влиять на получение и запись данных и т.п. В Qt есть готовый класс QSortFilterProxyModel.
+
+Представления в **QML могут отображать ТОЛЬКО СПИСКИ**. При помощи VisualDataModel можно перемещаться по древовидной структуре, но отображать мы можем только элементы текущего уровня. Если данные нужно хранить **в виде дерева** и при этом **отображать в QML**, то стоит либо воспользоваться VisualDataModel либо писать свою прокси-модель, которая превратит это дерево в список.
+
+# Своя модель / Кастомная C++-модель 
+
+http://security-corp.org/programming/33588-model-view-v-qml-chast-chetvertaya-c-modeli.html
+
+Для модели-списка нужно создать производный класс от QAbstractListModel и определить такие методы:
+- rowCount() — возвращает количество строк, в нашем случае это количество элементов;
+- data() — возвращает данные элемента;
+- roleNames() — возвращает список ролей, которые доступны в делегате. По умолчанию определены следующие роли: display, decoration, edit, toolTip, statusTip и whatsThis. В четвертой версии Qt вместо переопределения этой функции нужно было вызвать функцию setRoleNames(), которая устанавливала нужные имена ролей.
+- data()
+- setData()
+
+Если нам нужна **модель с ДРЕВОВИДНОЙ структурой** (нужно **ДЕРЕВО**), мы используем QAbstractItemModel. У этой модели надо будет дополнительно определить такие функции:
+- parent() — возвращает индекс родителя элемента;
+- index() — возвращает индекс элемента.
+Корневой элемент модели имеет недействительный индекс QModelIndex(). Так что если у нас простой список или таблица — у всех элементов родительский элемент будет именно таким.  Функция index() получает индекс родителя и номер строки и столбца элемента, должна возвращать индекс элемента.
+
