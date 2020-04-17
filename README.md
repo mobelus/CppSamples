@@ -3836,10 +3836,43 @@ void TestClass::setSomeProperty(const int &i)
 
 - emit - используется для высылки SIGNAL-а.
 
-### - SLOT (по умолчанию private)
-могут быть объявлены как virtual, public и private
+
+### - Signal Slot Permissions:
+https://stackoverflow.com/questions/19129133/qt-signals-and-slots-permissions
+
+### - EMIT можно и НЕ писать при высылке сигнала
+это синтаксический сахар, который нужен не компиляторам с++ или кутэ, а больше программисту
+
+```emit someSignal();``` 
+Идентично простому вызову:
+```someSignal();``` 
+
+### - SLOT по умолчанию НИКАКОЙ (требует самим дописать модификатор доступа)
+могут быть объявлены как virtual, public, protected, private
+```
+#     define slots
+is defined as an empty macro and therefore can be used with:
+```
+Программист ДОЛЖЕН написать перед slots что-то сам, иначе ошибка.
+
+### - SIGNAL по умолчанию PROTECTED (в Qt4) но PUBLIC (в Qt5)
+Signals are protected in Qt4 but are public in Qt5
+```
+qobjectdefs.h (QT5.0+). In there are defined the moc macros
+#     define signals public
+```
+
+Такой вариант тоже будет работать:
+```
+private:
+public: //signals:
+    void theSignal();
+```
+
+A signal can be defined with QPrivateSignal as its final argument.
 
 ### ВИРТУАЛЬНЫЙ Слот
+https://stackoverflow.com/questions/19129133/qt-signals-and-slots-permissions
 
 ### Соединение СИГНАЛА с ВИРТУАЛЬНЫМ Слотом МЕДЛЕННЕ, чем с Невритуальным.
 - События могут обрабатываться лишь одним методом, а сигналы многими слотами. 
