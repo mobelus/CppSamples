@@ -3202,8 +3202,19 @@ callback методы - просто указатели на функцию, п�
 ### Q: Шпаргалка по QT !
 http://cppstudio.com/post/11167/
 
-## 20 Qt Questions
+### 20 Qt Questions
 https://www.wisdomjobs.com/e-university/qt-qml-interview-questions.html01
+
+### Что под капотом у Signal, Slot, Q_OBJECT 
+
+# https://habr.com/ru/post/214379/
+
+```
+#define signals public
+#define slots /* nothing */
+
+#define Q_OBJECT \
+```
 
 ### QMAKE
 утилита (Qt-шный аналог CMAKE) для генерации Make-файлов, которые нужны для описания процесса построения сполняемых программ из исходных кодов
@@ -3779,7 +3790,7 @@ If the type is Qt::AutoConnection, the connection type is resolved when the sign
 
 
 
-######  Наследование класса от QObject-а.
+###  Наследование класса от QObject-а.
 Нужно в иерархии наследования выставлять его первым.
 
 
@@ -3824,27 +3835,29 @@ void TestClass::setSomeProperty(const int &i)
 ```
 
 - emit - используется для высылки SIGNAL-а.
-#### - SLOT (по умолчанию private)
+
+### - SLOT (по умолчанию private)
 могут быть объявлены как virtual, public и private
 
-#### ВИРТУАЛЬНЫЙ Слот
-#### Соединение СИГНАЛА с ВИРТУАЛЬНЫМ Слотом МЕДЛЕННЕ, чем с Невритуальным.
+### ВИРТУАЛЬНЫЙ Слот
+
+### Соединение СИГНАЛА с ВИРТУАЛЬНЫМ Слотом МЕДЛЕННЕ, чем с Невритуальным.
 - События могут обрабатываться лишь одним методом, а сигналы многими слотами. 
 
-#### 2) Разница между Q_INVOCABLE и SLOT-ом ?
+### Разница между Q_INVOCABLE и SLOT-ом ?
 
 Q_INVOCABLE - привязывается как обычная колбэчная функция, с одним методом, вызываемом при "emite", для данной функции. Функции С++ вызывающиеся в QML.
 
 SLOT - может быть любоче число сигналов, как и на любой сигнал можно повесить любое число слотов.
 
-#### 3) QObject это базовый класс для всех Qt классов. 
+### QObject это базовый класс для всех Qt классов. 
 
-#### 4) Для чего нужен макрос Q_OBJECT (ТОЛЬКО В PRIVATE СЕКЦИИ !!!)
+### Для чего нужен макрос Q_OBJECT (ТОЛЬКО В PRIVATE СЕКЦИИ !!!)
 
 Q_OBJECT макрос используется для включения мета объектных функций в классах и на этапе компиляции moc (Meta Object Compilator) работает как препроцессор который преобразует применения макроса Q_OBJECT в исходный код C++.
 
 
-#### 5) Что такое MOC
+### Что такое MOC
 
 Мета-объектный компилятор, moc, - программа, которая обрабатывает расширения C++ от Qt.
 moc работает как препроцессор который преобразует применения макроса Q_OBJECT в исходный код C++
@@ -3916,34 +3929,34 @@ GridView
 - Q_MOC_RUN
 - signals, slots, Q_PROPERTY, и прочее
 
-
-	#define Q_OBJECT \
-	public: \
-		Q_OBJECT_CHECK \ QT_WARNING_PUSH \ Q_OBJECT_NO_OVERRIDE_WARNING \
-		static const QMetaObject staticMetaObject; \
-		virtual void *qt_metacast(const char *); \
-		virtual int qt_metacall(QMetaObject::Call, int, void **); \
-		QT_TR_FUNCTIONS \
-	private: \
-		Q_DECL_HIDDEN_STATIC_METACALL static void qt_static_metacall(QObject *, QMetaObject::Call, int, void **); \
-		struct QPrivateSignal {}; \
-		QT_ANNOTATE_CLASS(qt_qobject, "")
-		
-	#ifndef QT_NO_META_MACROS
+```
+#define Q_OBJECT \
+public: \
+	Q_OBJECT_CHECK \ QT_WARNING_PUSH \ Q_OBJECT_NO_OVERRIDE_WARNING \
+	static const QMetaObject staticMetaObject; \
+	virtual void *qt_metacast(const char *); \
+	virtual int qt_metacall(QMetaObject::Call, int, void **); \
+	QT_TR_FUNCTIONS \
+private: \
+	Q_DECL_HIDDEN_STATIC_METACALL static void qt_static_metacall(QObject *, QMetaObject::Call, int, void **); \
+	struct QPrivateSignal {}; \
+	QT_ANNOTATE_CLASS(qt_qobject, "")
 	
-	#else // Q_MOC_RUN
-	#define slots slots
-	#define signals signals
-	#define Q_SLOTS Q_SLOTS
-	#define Q_SIGNALS Q_SIGNALS
-	#define Q_CLASSINFO(name, value) Q_CLASSINFO(name, value)
-	#define Q_INTERFACES(x) Q_INTERFACES(x)
-	#define Q_PROPERTY(text) Q_PROPERTY(text)
-	#define Q_PRIVATE_PROPERTY(d, text) Q_PRIVATE_PROPERTY(d, text)
-	#define Q_REVISION(v) Q_REVISION(v)
-	#define Q_OVERRIDE(text) Q_OVERRIDE(text)
-	#define Q_ENUMS(x) Q_ENUMS(x)
+#ifndef QT_NO_META_MACROS
 
+#else // Q_MOC_RUN
+#define slots slots
+#define signals signals
+#define Q_SLOTS Q_SLOTS
+#define Q_SIGNALS Q_SIGNALS
+#define Q_CLASSINFO(name, value) Q_CLASSINFO(name, value)
+#define Q_INTERFACES(x) Q_INTERFACES(x)
+#define Q_PROPERTY(text) Q_PROPERTY(text)
+#define Q_PRIVATE_PROPERTY(d, text) Q_PRIVATE_PROPERTY(d, text)
+#define Q_REVISION(v) Q_REVISION(v)
+#define Q_OVERRIDE(text) Q_OVERRIDE(text)
+#define Q_ENUMS(x) Q_ENUMS(x)
+```
 
 # Как работает класс QObject / Макрос Q_OBJECT ?
 
