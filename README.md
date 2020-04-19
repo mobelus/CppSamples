@@ -486,6 +486,25 @@ A: Два
 A: См. Таблицу сложностей операций // TO DO
 
 -----------------------------------------------
+### Q: Design PATTERNS / Паттерны проектирования КНИГИ:
+Книги:
+- http://www.sugardas.lt/~p2d/books/Priemioop.pdf
+
+- http://www.williamspublishing.com/PDF/5-8459-0301-7/part1.pdf
+- http://www.williamspublishing.com/PDF/5-8459-0301-7/part2.pdf
+- http://www.williamspublishing.com/PDF/5-8459-0301-7/part3.pdf
+- http://www.williamspublishing.com/PDF/5-8459-0301-7/part4.pdf
+- http://www.williamspublishing.com/PDF/5-8459-0301-7/part5.pdf
+- http://www.williamspublishing.com/PDF/5-8459-0301-7/part6.pdf
+
+Ссылки:
+- https://habr.com/ru/post/210288/
+- http://cpp-reference.ru/patterns/
+- https://refactoring.guru/ru/design-patterns/cpp
+- http://citforum.ru/SE/project/pattern/
+
+
+-----------------------------------------------
 ### Q: Design PATTERNS / Паттерны проектирования ?
 https://habr.com/ru/post/210288/
 
