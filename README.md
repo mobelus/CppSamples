@@ -298,17 +298,20 @@ out << str << endl;
 
 # UUID UUID UUID UUID UUID
 
+### Разные вопросы с примерами
+https://www.bestprog.net/ru/2018/04/02/c-class-constructor-features-of-use-constructors-in-the-classes-the-default-constructor-parameterized-constructors-examples-of-classes-that-contain-constructors_ru/
+
 ### undefined behavoiur 
 --
 
 ### rvalue и lvalue
-lvalue - то, что имеет конкретный адрес в памяти
-rvalue - то, что адреса не имеет, то, что называется временным объектом
+- lvalue - то, что имеет конкретный адрес в памяти
+- rvalue - то, что адреса не имеет, то, что называется временным объектом
 
 ### Методы класса определяются неявно / по умолчанию
-class A { };
+```class A { };```
 
-Отыет:
+Ответ:
 - конструктор по умолчанию (без аргументов)
 (- деструктор)
 - конструктор копирования по умолчанию
