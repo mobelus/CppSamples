@@ -321,9 +321,12 @@ https://www.bestprog.net/ru/2018/04/02/c-class-constructor-features-of-use-const
 ```
 То есть объявление class A {} может быть эквивалентно следующему:
   A() {} 
-  A(const A&) {} 
-  A& operator=(const A&) {} 
-}; 
+  ~A() {} 
+  A(const A& that) {}
+  A& operator=(const A& that) {}
+  A(A&& that) {} // C++11
+  A& operator=(A&& that) {} // C++11
+};
 ```
 ### Когда конструктор по умолчанию не создается ?
 
@@ -356,9 +359,10 @@ A& operator=(const A& _obj)
 
 ### Если В классе есть указатель, что стоит перегрузить ?
 До С++11
-- Правило Трёх (1. констр, дестр, 2. констр копии 3. оператор равно)
+- Правило **Трёх** / Правило Трех (1. констр, дестр, 2. констр копии 3. оператор равно)
+
 Начиная С++11
-- Правило Пяти 
+- Правило **Пяти** 
 (1. констр, дестр, 2. констр копии 3. оператор равно
 +4. констр. перемещения +5. оператор перемещения)
 
@@ -367,58 +371,58 @@ A& operator=(const A& _obj)
 class Buffer
 {
 public:
-    Buffer(const std::string& buff)
-    :   pBuff(nullptr)
-    ,   buffSize(buff.length())
-    {
-        pBuff = new char[buffSize];
-        memcpy(pBuff, buff.c_str(), buffSize);
-    }
+  Buffer(const std::string& buff)
+  :   pBuff(nullptr)
+  ,   buffSize(buff.length())
+  {
+      pBuff = new char[buffSize];
+      memcpy(pBuff, buff.c_str(), buffSize);
+  }
 
-    ~Buffer(){ destroy(); }
+  ~Buffer(){ destroy(); }
 
-    Buffer(const Buffer& other)
-    :   pBuff(nullptr)
-    ,   buffSize(other.buffSize)
-    {
-        pBuff = new char[buffSize];
-        memcpy(pBuff, other.pBuff, buffSize);
-    }
+  Buffer(const Buffer& other)
+  :   pBuff(nullptr)
+  ,   buffSize(other.buffSize)
+  {
+    pBuff = new char[buffSize];
+    memcpy(pBuff, other.pBuff, buffSize);
+  }
 
-    Buffer& operator=(const Buffer& other)
-    {
-        destroy();
-        buffSize = other.buffSize;
-        pBuff = new char[buffSize];
-        memcpy(pBuff, other.pBuff, buffSize);
-        return *this;
-    }
+  Buffer& operator=(const Buffer& other)
+  {
+    destroy();
+    buffSize = other.buffSize;
+    pBuff = new char[buffSize];
+    memcpy(pBuff, other.pBuff, buffSize);
+    return *this;
+  }
 
-    Buffer(Buffer&& tmp)
-    :   pBuff(tmp.pBuff)
-    ,   buffSize(tmp.buffSize)
-    {
-        tmp.pBuff = nullptr;
-    }
+  Buffer(Buffer&& tmp)
+  :   pBuff(tmp.pBuff)
+  ,   buffSize(tmp.buffSize)
+  {
+    tmp.pBuff = nullptr;
+  }
 
-    Buffer& operator=(Buffer&& tmp)
-    {
-        destroy();
-        buffSize = tmp.buffSize;
-        pBuff = tmp.pBuff;
-        tmp.pBuff = nullptr;
-        return *this;
-    }
+  Buffer& operator=(Buffer&& tmp)
+  {
+    destroy();
+    buffSize = tmp.buffSize;
+    pBuff = tmp.pBuff;
+    tmp.pBuff = nullptr;
+    return *this;
+  }
 
 private:
-    void destroy()
-    {
-        if (pBuff)
-            delete[] pBuff;
-    }
+  void destroy()
+  {
+    if (pBuff)
+        delete[] pBuff;
+  }
 
-    char* pBuff;
-    size_t buffSize;
+  char* pBuff;
+  size_t buffSize;
 };
 ```
 
