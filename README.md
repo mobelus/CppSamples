@@ -4950,6 +4950,7 @@ B b(A i); // это ПРОТОТИП функции, а не вызов конс
 B b(A{i}); // это ХЗ ???
 B b( (A(i)) ); // Тоже что и ранее, но без ФИГУРНОЙ ИНИЦИАЛИЗАЦИИ
 
+# Что такое RVALUE и LVALUE
 RVALUE - временный объект
 int x = 5; //  x - lvalue // 5 - rvalue //
 int(10); // тоже rvalue
@@ -4976,6 +4977,7 @@ rvalue - то у чего нет имени
 Lvalue reference это любая конструкция типа "any_type&"
 Rvalue reference это любая конструкция типа "any_type&&"
 
+# Что такое RVALUE и LVALUE Reference / RVALUE и LVALUE Ссылка
 Именно "&&" и есть новы тип называемый RValue **ЭРвэлью Ссылка** или **ЭрВэлью Рефереренс** или **Универсальная ссылка** или **Супер ссылка**
 
 ### Для чего на практике нужен Rvalue Reference ?
@@ -5068,7 +5070,7 @@ void foo(T && t) {}
 - если вызвать foo от Rvalue типа А, то T = A
 
 
-/*
+### fbvector — улучшенный std::vector от Facebook
 https://habr.com/ru/company/infopulse/blog/238131/
 
 ### Аллокатор
@@ -5093,16 +5095,16 @@ public:
 
   pointer allocate(size_type _Count)  // Выделяем память для _Count элементов
   {                                   // типа value_type
-	void *_Ptr = 0;
+    void *_Ptr = 0;
 
-	if (_Count == 0)  // Если ничего не запросили, то ничего и не делаем
-		;
-	else if (((size_t)(-1) / sizeof(value_type) < _Count)
-		|| (_Ptr = ::operator new(_Count * sizeof(value_type))) == 0)
-	{
-		throw bad_alloc();  // Выделение памяти не удалось
-	}
-	return ((pointer)_Ptr);
+    if (_Count == 0)  // Если ничего не запросили, то ничего и не делаем
+    	;
+    else if (((size_t)(-1) / sizeof(value_type) < _Count)
+    	|| (_Ptr = ::operator new(_Count * sizeof(value_type))) == 0)
+    {
+    	throw bad_alloc();  // Выделение памяти не удалось
+    }
+    return ((pointer)_Ptr);
   }
 
   void deallocate(pointer _Ptr, size_type)
@@ -5121,22 +5123,22 @@ public:
 class Foo
 {
 public:
-	Foo() {}
+  Foo() {}
 };
 
 int main(int argc, char** argv)
 {
-	// Вот так мы все привыкли создавать объект в "куче":
-	Foo *foo1 = new Foo(); // Выделение памяти + Вызов конструктора
+  // Вот так мы все привыкли создавать объект в "куче":
+  Foo *foo1 = new Foo(); // Выделение памяти + Вызов конструктора
 
-	// А вот какие вызовы происходят на самом деле:
-	void *ptr = operator new(sizeof(Foo)); // Выделение памяти
-	Foo *foo2 = ::new (ptr) Foo(); // Вызов конструктора, синтаксис размещения
+  // А вот какие вызовы происходят на самом деле:
+  void *ptr = operator new(sizeof(Foo)); // Выделение памяти
+  Foo *foo2 = ::new (ptr) Foo(); // Вызов конструктора, синтаксис размещения
 
-	return 0;
+  return 0;
 }
 ```
-Широко распространно заблуждение, что применение оператора new (первый случай в примере) подразумевает необходимость работать с кучей(heap).Вызов new, лишь означает, что будет вызвана функция operator new и эта функция возвратит указатель на некоторую область памяти, Стандартные operator new и operator delete действительно работают с кучей, но члены operator new и operator delete могут делать всё, что угодно!Нет ограничения на то, где будет выделена область памяти.Но вернемся к вектору.
+Широко распространно заблуждение, что применение оператора new (первый случай в примере) подразумевает необходимость работать с кучей(heap). Вызов new, лишь означает, что будет вызвана функция operator new и эта функция возвратит указатель на некоторую область памяти, Стандартные operator new и operator delete действительно работают с кучей, но члены operator new и operator delete могут делать всё, что угодно!Нет ограничения на то, где будет выделена область памяти.Но вернемся к вектору.
 
 После того, как память будет выделена, она “переходит” под управление вектора.
 
@@ -5148,7 +5150,7 @@ int main(int argc, char** argv)
 - третий(end) указывает на “конец” выделенной области памяти
 
 
-STD::ARRAY
+# STD::ARRAY
 ```
 template < class T,
 	std::size_t N
@@ -5206,7 +5208,7 @@ template<
 > class queue;
 ```
 
-STD::PRIORITY_QUEUE
+# STD::PRIORITY_QUEUE
 ```
 template<
 	class T,
@@ -5220,7 +5222,7 @@ template<
 
 # Какой ТРЕТИЙ параметр в шаблоне есть у std::map ?
 Ответ: функция компаратор. Для простых или POD типов (int,char и т.д.) и готовых (std::string) типов можно использовать библиотечные компараторы **std::less<>** или **std::greater<>**
-
+```
 std::map< std::string, int, **std::greater<>** > myMap;
 
 myMap["A"] = 90;
@@ -5228,13 +5230,13 @@ myMap["C"] = 9;
 myMap["B"] = 99;
 // порядок для greater будет C(9), B(99), A(90)
 // порядок для less    будет A(90), B(99), C(9)
-
+```
 ### Что нужно определить в структуре / классе, чтобы класс можно было добавить в ассоциативный контейнер std::map / std::set и т.д. ?
 
 ### Что нужно сделать, чтобы использовать структуру / класс, как ключ в ассоциативном контейнере std::map / std::set и т.д. ?
 
 ### Что нужно сделать, чтобы использовать структуру / класс, в качестве ключа в ассоциативном контейнере std::map / std::set и т.д. ?
-В структуре/классе нужно переопределить оператор "меньше", либо определить функтор "меньше" и передавать в качестве параметра шаблона (например - третьим параметром для map или set ).
+- В структуре/классе нужно переопределить оператор "меньше", либо определить функтор "меньше" и передавать в качестве параметра шаблона (например - третьим параметром для map или вторым для set ).
 
 Сигнатура оператора Меньше для Класса/Структуры (operator <)
 ``` bool operator<(const Class& _that) const ```
@@ -5248,14 +5250,14 @@ bool operator<(const Class& _that) const
   { res = true; }
   else if(this->param_1 == _that.param_1)
   {
-	if (this->param_2 < _that.param_2 )
-	{ res = true; }
-	else if(this->param_2 == _that.param_2)
-	{  ...
-	  {
-		res = this->param_N < _that.param_N;
-	  }
-	}
+    if (this->param_2 < _that.param_2 )
+    { res = true; }
+    else if(this->param_2 == _that.param_2)
+    {  ...
+      {
+    	res = this->param_N < _that.param_N;
+      }
+    }
   }
   return res;
 }
@@ -5270,14 +5272,14 @@ bool compareFunc(const Param& lhs, const Param& rhs)
   { res = true; }
   else if(lhs.param_1 == rhs.param_1)
   {
-	if (lhs.param_2 < rhs.param_2 )
-	{ res = true; }
-	else if(lhs.param_2 == rhs.param_2)
-	{  ...
-	  {
-		res = lhs.param_N < rhs.param_N;
-	  }
-	}
+    if (lhs.param_2 < rhs.param_2 )
+    { res = true; }
+    else if(lhs.param_2 == rhs.param_2)
+    {  ...
+      {
+    	res = lhs.param_N < rhs.param_N;
+      }
+    }
   }
   return res;
 }
@@ -5286,121 +5288,120 @@ bool compareFunc(const Param& lhs, const Param& rhs)
 # PATTERN Observer
 
 // https://www.youtube.com/watch?v=ZCd_7r-iHfY
-
-*/
-
-
-struct XY {
-	XY(int x, int y)
-		: X(x)
-		, Y(y)
-	{}
-
+```
+struct XY 
+{
+XY(int x, int y)
+	: X(x)
+	, Y(y)
+  {}
 private:
-	int X, Y;
+  int X, Y;
 };
 
-struct Coord {
-	Coord(int x, int y)
-		: X(x)
-		, Y(y)
-	{}
+struct Coord
+{
+Coord(int x, int y)
+	: X(x)
+	, Y(y)
+{}
 
-	int getX() { return X; }
-	int getY() { return Y; }
+  int getX() { return X; }
+  int getY() { return Y; }
 
-	bool operator<(const Coord& p) const {
-		return ((this->X < p.X) && (this->Y < p.Y));
-	}
+  bool operator<(const Coord& p) const {
+	return ((this->X < p.X) && (this->Y < p.Y));
+  }
 
 private:
-	int X, Y;
+  int X, Y;
 };
 
 struct Point {
-	Point(int x, int y)
-		: X(x)
-		, Y(y)
-	{}
+Point(int x, int y)
+	: X(x)
+	, Y(y)
+{}
 
-	bool operator<(const Point& _that) const
-	{
-		bool res = false;
-		if (this->X < _that.X)
-		{
-			res = true;
-		}
-		else if (this->X == _that.X)
-		{
-			res = this->Y < _that.Y;
-		}
-		return res;
-	}
+bool operator<(const Point& _that) const
+{
+  bool res = false;
+  if (this->X < _that.X)
+  {
+  	res = true;
+  }
+  else if (this->X == _that.X)
+  {
+  	res = this->Y < _that.Y;
+  }
+  return res;
+}
 
-	/*
-	bool operator<(const Point& p) const {
-		return ((this->X < p.X) && (this->Y < p.Y));
-	}
-	*/
+/*
+bool operator<(const Point& p) const {
+  return ((this->X < p.X) && (this->Y < p.Y));
+}
+*/
 
-	bool const operator==(const Point &_that) {
-		return this->X == _that.X && this->Y == _that.Y;
-	}
+bool const operator==(const Point &_that) {
+  return this->X == _that.X && this->Y == _that.Y;
+}
 
-	// https://www.linux.org.ru/forum/development/13246470
-	//..операторы «больше» и «равно» выводятся из одного оператора «меньше»
-	// Чтобы поддерживать SORT, FIND и т.д. НЕ нужен оператор equality (a == b)
-	// А НУЖЕН  equivalence  это когда первое значение не меньше второго, ни второе значение не меньше первого => (!(a < b) && !(b < a))
+// https://www.linux.org.ru/forum/development/13246470
+//..операторы «больше» и «равно» выводятся из одного оператора «меньше»
+// Чтобы поддерживать SORT, FIND и т.д. НЕ нужен оператор equality (a == b)
+// А НУЖЕН  equivalence  это когда первое значение не меньше второго, ни второе значение не меньше первого => (!(a < b) && !(b < a))
 
-	// оператор БОЛЬШЕ > выражается через меньше => возвращает тру, когда не меньше и не равно => ()
-	// оператор РАВНО ==  =>  
-	//операторы «больше» и «равно» выводятся из одного оператора «меньше»
-	//по теме : определи оператор «меньше», либо определи функтор «меньше» и передай в качестве параметра шаблона.
+  // оператор БОЛЬШЕ > выражается через меньше => возвращает тру, когда не меньше и не равно => ()
+  // оператор РАВНО ==  =>  
+  //операторы «больше» и «равно» выводятся из одного оператора «меньше»
+  //по теме : определи оператор «меньше», либо определи функтор «меньше» и передай в качестве параметра шаблона.
 
-//	friend bool operator<(const Point& l, const Point& r);
+//  friend bool operator<(const Point& l, const Point& r);
 
 private:
-	int X, Y;
+  int X, Y;
 };
 
 //bool operator<(const Point& l, const Point& r) {
-//	return (l.X < r.X || (l.X == r.X && l.Y < r.Y));
+//  return (l.X < r.X || (l.X == r.X && l.Y < r.Y));
 //}
 
 void main()
 {
-	std::map<XY, int> mXY;
-	XY xy1(0, 1);
-	//mXY[xy1] = 1; // ERROR WILL NOT COMPILE //error C2678: бинарный "<": не найден оператор, прини
+  std::map<XY, int> mXY;
+  XY xy1(0, 1);
+  //mXY[xy1] = 1; // ERROR WILL NOT COMPILE //error C2678: бинарный "<": не найден оператор, прини
 
-	std::map<Coord, int> mCrd;
-	Coord c1(0, 1);
-	Coord c2(1, 0);
-	Coord c3(1, 1);
-	Coord c4(2, 2);
-	mCrd[c1] = 1; // size=1 | mCrd<(0, 1)> = 1;
-	mCrd[c2] = 2; // size=1 | mCrd<(0, 1)> = 2;
-	mCrd[c3] = 3; // size=1 | mCrd<(0, 1)> = 3;
-	mCrd[c3] = 4; // size=1 | mCrd<(0, 1)> = 4;
+  std::map<Coord, int> mCrd;
+  Coord c1(0, 1);
+  Coord c2(1, 0);
+  Coord c3(1, 1);
+  Coord c4(2, 2);
+  mCrd[c1] = 1; // size=1 | mCrd<(0, 1)> = 1;
+  mCrd[c2] = 2; // size=1 | mCrd<(0, 1)> = 2;
+  mCrd[c3] = 3; // size=1 | mCrd<(0, 1)> = 3;
+  mCrd[c3] = 4; // size=1 | mCrd<(0, 1)> = 4;
 
-	//if (c1 < c2)  std::cout << "c1 < c2";
+  //if (c1 < c2)  std::cout << "c1 < c2";
 
-	std::map<Point, int> mPnt;
-	Point p1(0, 1);
-	Point p2(1, 0);
-	Point p3(1, 1);
-	Point p4(2, 2);
-	mPnt[p1] = 1; // size=1 | mCrd<(0, 1)> = 1;
-	mPnt[p2] = 2; // size=2 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2;
-	mPnt[p3] = 3; // size=3 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2; mCrd<(1, 1)> = 3;
-	mPnt[p3] = 4; // size=4 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2; mCrd<(1, 1)> = 3; mCrd<(2, 2)> = 4;
+  std::map<Point, int> mPnt;
+  Point p1(0, 1);
+  Point p2(1, 0);
+  Point p3(1, 1);
+  Point p4(2, 2);
+  mPnt[p1] = 1; // size=1 | mCrd<(0, 1)> = 1;
+  mPnt[p2] = 2; // size=2 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2;
+  mPnt[p3] = 3; // size=3 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2; mCrd<(1, 1)> = 3;
+  mPnt[p3] = 4; // size=4 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2; mCrd<(1, 1)> = 3; mCrd<(2, 2)> = 4;
 
-	if (p1 < p2)  std::cout << "p1 < p2";
-	//if (p1>p2)  std::cout << "p1 > p2";
-	//if (p1==p2) std::cout << "p1 = p2";
+  if (p1 < p2)  std::cout << "p1 < p2";
+  //if (p1>p2)  std::cout << "p1 > p2";
+  //if (p1==p2) std::cout << "p1 = p2";
 
-	std::cout << mPnt[p1] << mPnt[p2];
+  std::cout << mPnt[p1] << mPnt[p2];
 }
+```
 
 # Различие между С и С++ / между C и C++ / Разница между С и С++ / между C и C++
 
