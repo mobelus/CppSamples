@@ -4934,6 +4934,474 @@ foreach, forever
 slots: void slot(int n); // **ERROR** НЕ хватает модификатора доступа !
 
 
+
+# Что такое Small Object Optimization ?
+Ответ: внутри класса string есть специальный буфер, под неболшие строки. В случае, если строка не больше, чем этот буфер (для небольших объектов), то память под строку не выделяется, а просто используется этот буфер, для оптимизации процесса выделения памяти подстроку. Ибо выделение памяти всегда дорогостоящий процесс.
+
+# Всякие синтетические примеры
+(); - ошибка копиляции - выражение в скобках должно быть выражение или любой другой вычислимый объект.
+{}; - на месте скобок будет НОЛЬ - Пустой список инициализации по умолчанию инициализируется нулём.
+A a{}; - вызовит конструктор по умолчанию
+A a(); // это ПРОТОТИП функции, а не вызов конструктора класса А
+
+int i = 1;
+B b(A i); // это ПРОТОТИП функции, а не вызов конструктора класса А
+
+B b(A{i}); // это ХЗ ???
+B b( (A(i)) ); // Тоже что и ранее, но без ФИГУРНОЙ ИНИЦИАЛИЗАЦИИ
+
+RVALUE - временный объект
+int x = 5; //  x - lvalue // 5 - rvalue //
+int(10); // тоже rvalue
+числа это - pure rvalue
+
+Есть 3 категории:
+- lvalue 
+- xvalue (expired value)
+- prvalue (pure rvalue)
+Есть 2  доп категории:
+- rvalue  = (pvalue + xvalue)
+- glvalue = (lvalue + xvalue) generalized lvalue
+
+https://www.youtube.com/watch?v=8fGP_c3pzNg
+https://www.youtube.com/watch?v=N4treTtmy94
+https://www.youtube.com/watch?v=xk9y5Bbzv2w
+
+https://www.youtube.com/watch?v=kwyFsdSsTmc
+
+- Основное отличие rvalue от lvalue в том, что объекты rvalue могут быть перемещены, тогда как объекты lvalue всегда копируются.
+
+lvalue - с визуальной точки зрения - то, у чего есть имя.
+rvalue - то у чего нет имени
+Lvalue reference это любая конструкция типа "any_type&"
+Rvalue reference это любая конструкция типа "any_type&&"
+
+Именно "&&" и есть новы тип называемый RValue **ЭРвэлью Ссылка** или **ЭрВэлью Рефереренс** или **Универсальная ссылка** или **Супер ссылка**
+
+### Для чего на практике нужен Rvalue Reference ?
+Для того, чтобы делать перегрузку функций. Пример:
+```
+string low_case(strin& s);
+string low_case(strin&& s);
+``` 
+
+```
+class Dog {
+public:
+  Dog() {}
+};
+
+int fun() {
+  return 101;
+};
+
+int main() {
+  int a; // lvalue
+  Dog rex; // lvalue
+  // ver 1: lvalue ref --binds--> lvalue 
+  int& simpleRef = a;
+  // ver 2: const lvalue ref --binds--> rvalue 
+  const int& constRef = a;
+  
+  // ver 3: rvalue ref --binds--> rvalue ONLY ! 
+  int&& rValRef = a; // COMPILLER ERROR a is LValue 
+  
+  fun(); // результат, который возвращает функция это rvalue
+  Dog{}; // rvalue
+}
+```
+# std::move - занимется ТОЛЬКО ПРИВЕДЕНИЕМ ЛЮБОГО ТИПА к типу rvalue. Внутри него происходит Удаление Всех ссылок из входного типа, и подставление Двух ссылок соотвественно, чтобы получилась Rvalue-ссылка.
+
+```
+template<typename _Tp>
+  inline typename std::remove_reference<_Tp>::type&&
+  move(_Tp&& __t)
+  { return static_cast<typename std::remove_reference<_Tp>::type&&>(__t); }
+```
+
+```
+// Пример 1
+std::vector
+int a = 3;
+lvalue a
+rvalue 5
+выполняем push_back ( a );
+В это время происходит копирование объекта a, и копия кладётся в вектор.
+выполняем push_back ( 5 );
+В этом случае произойдёт просто перемещение 5-ки в вектор, без еопирования а на месте пятёрки останется valid-ное значение.
+
+// Пример 2
+// str - lvalue   "Hello ..." - rvalue
+std::string str = "Hello world!";
+std::vector<std::string> v;
+v.pushback(std::move(str));
+Было  [Hello world!] Вектор: 0
+Без копирования содержимого строки, содержимое именно "переместилось"
+Стало [            ] Вектор: [Hello world!]
+
+// ПРАВИЛО мы не можем передавать Rvalue в неконстатнтный Lvalue
+void inc(int& n) { n++; }
+inc(3) // ERROR !!! 3 - rvalue
+
+void inc(const int& n) { ; }
+inc(3) // OK !!!
+
+// T& x = Rvalue
+// T& x = Lvalue
+// T&& x = Lvalue // ERROR !
+```
+ 
+# СКЛЕЙКА ССЫЛОК
+```
+T&   &  -> T&
+T&  &&  -> T&
+T&&  &  -> T&
+T&& &&  -> T&&
+```
+
+### Универсальная ссылка:
+```
+template<typename T>
+void foo(T && t) {}
+```
+- если вызвать foo от Lvalue типа А, то T = A&
+- если вызвать foo от Rvalue типа А, то T = A
+
+
+/*
+https://habr.com/ru/company/infopulse/blog/238131/
+
+### Аллокатор
+http://artlang.net/post/vector-c++-effektivno/
+
+# Стандартный Аллокатор в STL - STD::ALLOCATOR
+
+std::allocator. Он, кстати, используется по умолчанию для всех контейнеров библиотеки STL.
+
+Вектору(и всем другим контейнерам STL) от аллокатора нужно прежде всего, чтобы он выделял и освобождал некоторую область памяти, в тот момент когда это требуется контейнеру, Стандартный аллокатор делает это так :
+```
+template<class T>
+class allocator
+{
+public:
+  typedef T value_type;
+
+  typedef value_type *pointer;
+  typedef const value_type *const_pointer
+
+  typedef size_t size_type;
+
+  pointer allocate(size_type _Count)  // Выделяем память для _Count элементов
+  {                                   // типа value_type
+	void *_Ptr = 0;
+
+	if (_Count == 0)  // Если ничего не запросили, то ничего и не делаем
+		;
+	else if (((size_t)(-1) / sizeof(value_type) < _Count)
+		|| (_Ptr = ::operator new(_Count * sizeof(value_type))) == 0)
+	{
+		throw bad_alloc();  // Выделение памяти не удалось
+	}
+	return ((pointer)_Ptr);
+  }
+
+  void deallocate(pointer _Ptr, size_type)
+  {
+	::operator delete(_Ptr);  // Освобождение памяти
+  }
+
+  // Остальная реализация не приводится, чтобы сохранить наглядность примера
+};
+```
+Так аллокатор реализован у Microsoft(MSVC), и также он реализован в GCC.Нужно понимать, что operator new отличается от просто new.Вызов new (который все мы используем) на самом деле разбивается на два этапа, если так можно выразиться : сначала вызывается operator new, который возвращает указатель на некоторую выделенную область памяти, а затем вызывается конструктор, который создает объект в этой области.Вызвать конструктор напрямую невозможно, однако с помощью синтаксиса размещения можно заставить компилятор вызвать коструктор.Следующие два примера создания foo1 и foo2 идентичны :
+
+```
+#include <new>
+
+class Foo
+{
+public:
+	Foo() {}
+};
+
+int main(int argc, char** argv)
+{
+	// Вот так мы все привыкли создавать объект в "куче":
+	Foo *foo1 = new Foo(); // Выделение памяти + Вызов конструктора
+
+	// А вот какие вызовы происходят на самом деле:
+	void *ptr = operator new(sizeof(Foo)); // Выделение памяти
+	Foo *foo2 = ::new (ptr) Foo(); // Вызов конструктора, синтаксис размещения
+
+	return 0;
+}
+```
+Широко распространно заблуждение, что применение оператора new (первый случай в примере) подразумевает необходимость работать с кучей(heap).Вызов new, лишь означает, что будет вызвана функция operator new и эта функция возвратит указатель на некоторую область памяти, Стандартные operator new и operator delete действительно работают с кучей, но члены operator new и operator delete могут делать всё, что угодно!Нет ограничения на то, где будет выделена область памяти.Но вернемся к вектору.
+
+После того, как память будет выделена, она “переходит” под управление вектора.
+
+### Сколько нужно переменных вектору, чтобы реализовать весь свой интерфейс ?
+Ответ: ТРИ . Три указатя достаточно, чтобы вектор смог управлять памятью и обеспечил весь свой функционал:
+
+- первый(first) указатель указывает на начало выделенной области памяти
+- второй(last) указатель указывает на позицию следующую за последним элементом, хранящимся в выделенной области памяти
+- третий(end) указывает на “конец” выделенной области памяти
+
+
+STD::ARRAY
+```
+template < class T,
+	std::size_t N
+> struct array;
+```
+
+# STD::VECTOR / STD::LIST / STD::FORWARD_LIST / STD::DEQUE
+```
+template< class T, // 1
+	class Allocator = std::allocator<T> // 2
+> class vector, list, deque;
+```
+
+# STD::SET
+```
+template< class Key, // 1
+	class Compare = std::less<Key>, // 2
+	class Allocator = std::allocator<Key> //3
+> class set;
+```
+
+# STD::MAP
+```
+template< class Key, // 1
+	class T, // 2
+	class Compare = std::less<Key>, // 3
+	class Allocator = std::allocator<std::pair<const Key, T> > // 4
+> class map;
+```
+
+# STD::UNORDERED_SET
+```
+template< class Key, // 1
+	class Hash = std::hash<Key>, // 2
+	class KeyEqual = std::equal_to<Key>, // 3
+	class Allocator = std::allocator<Key> // 4
+> class unordered_set;
+```
+
+# STD::UNORDERED_MAP
+```
+template< class Key, // 1
+	class T, // 2
+	class Hash = std::hash<Key>, // 3
+	class KeyEqual = std::equal_to<Key>, // 4
+	class Allocator = std::allocator< std::pair<const Key, T> > // 5
+> class unordered_map;
+```
+
+# STD::QUEUE
+```
+template<
+	class T,
+	class Container = std::deque<T>
+> class queue;
+```
+
+STD::PRIORITY_QUEUE
+```
+template<
+	class T,
+	class Container = std::vector<T>,
+	class Compare = std::less<typename Container::value_type>
+> class priority_queue;
+```
+
+# Какой ЧЕТВЁРТЫЙ параметр в шаблоне есть у std::map ?
+Ответ: Аллокатор
+
+# Какой ТРЕТИЙ параметр в шаблоне есть у std::map ?
+Ответ: функция компаратор. Для простых или POD типов (int,char и т.д.) и готовых (std::string) типов можно использовать библиотечные компараторы **std::less<>** или **std::greater<>**
+
+std::map< std::string, int, **std::greater<>** > myMap;
+
+myMap["A"] = 90;
+myMap["C"] = 9;
+myMap["B"] = 99;
+// порядок для greater будет C(9), B(99), A(90)
+// порядок для less    будет A(90), B(99), C(9)
+
+### Что нужно определить в структуре / классе, чтобы класс можно было добавить в ассоциативный контейнер std::map / std::set и т.д. ?
+
+### Что нужно сделать, чтобы использовать структуру / класс, как ключ в ассоциативном контейнере std::map / std::set и т.д. ?
+
+### Что нужно сделать, чтобы использовать структуру / класс, в качестве ключа в ассоциативном контейнере std::map / std::set и т.д. ?
+В структуре/классе нужно переопределить оператор "меньше", либо определить функтор "меньше" и передавать в качестве параметра шаблона (например - третьим параметром для map или set ).
+
+Сигнатура оператора Меньше для Класса/Структуры (operator <)
+``` bool operator<(const Class& _that) const ```
+
+Оператор Меньше для Класса/Структуры с несколькими полями (operator <)
+```
+bool operator<(const Class& _that) const
+{
+  bool res = false;
+  if (this->param_1 < _that.param_1)
+  { res = true; }
+  else if(this->param_1 == _that.param_1)
+  {
+	if (this->param_2 < _that.param_2 )
+	{ res = true; }
+	else if(this->param_2 == _that.param_2)
+	{  ...
+	  {
+		res = this->param_N < _that.param_N;
+	  }
+	}
+  }
+  return res;
+}
+```
+
+Функция компаратор для Класса/Структуры с несколькими полями
+```
+bool compareFunc(const Param& lhs, const Param& rhs)
+{
+  bool res = false;
+  if (lhs.param_1 < rhs.param_1)
+  { res = true; }
+  else if(lhs.param_1 == rhs.param_1)
+  {
+	if (lhs.param_2 < rhs.param_2 )
+	{ res = true; }
+	else if(lhs.param_2 == rhs.param_2)
+	{  ...
+	  {
+		res = lhs.param_N < rhs.param_N;
+	  }
+	}
+  }
+  return res;
+}
+```
+
+# PATTERN Observer
+
+// https://www.youtube.com/watch?v=ZCd_7r-iHfY
+
+*/
+
+
+struct XY {
+	XY(int x, int y)
+		: X(x)
+		, Y(y)
+	{}
+
+private:
+	int X, Y;
+};
+
+struct Coord {
+	Coord(int x, int y)
+		: X(x)
+		, Y(y)
+	{}
+
+	int getX() { return X; }
+	int getY() { return Y; }
+
+	bool operator<(const Coord& p) const {
+		return ((this->X < p.X) && (this->Y < p.Y));
+	}
+
+private:
+	int X, Y;
+};
+
+struct Point {
+	Point(int x, int y)
+		: X(x)
+		, Y(y)
+	{}
+
+	bool operator<(const Point& _that) const
+	{
+		bool res = false;
+		if (this->X < _that.X)
+		{
+			res = true;
+		}
+		else if (this->X == _that.X)
+		{
+			res = this->Y < _that.Y;
+		}
+		return res;
+	}
+
+	/*
+	bool operator<(const Point& p) const {
+		return ((this->X < p.X) && (this->Y < p.Y));
+	}
+	*/
+
+	bool const operator==(const Point &_that) {
+		return this->X == _that.X && this->Y == _that.Y;
+	}
+
+	// https://www.linux.org.ru/forum/development/13246470
+	//..операторы «больше» и «равно» выводятся из одного оператора «меньше»
+	// Чтобы поддерживать SORT, FIND и т.д. НЕ нужен оператор equality (a == b)
+	// А НУЖЕН  equivalence  это когда первое значение не меньше второго, ни второе значение не меньше первого => (!(a < b) && !(b < a))
+
+	// оператор БОЛЬШЕ > выражается через меньше => возвращает тру, когда не меньше и не равно => ()
+	// оператор РАВНО ==  =>  
+	//операторы «больше» и «равно» выводятся из одного оператора «меньше»
+	//по теме : определи оператор «меньше», либо определи функтор «меньше» и передай в качестве параметра шаблона.
+
+//	friend bool operator<(const Point& l, const Point& r);
+
+private:
+	int X, Y;
+};
+
+//bool operator<(const Point& l, const Point& r) {
+//	return (l.X < r.X || (l.X == r.X && l.Y < r.Y));
+//}
+
+void main()
+{
+	std::map<XY, int> mXY;
+	XY xy1(0, 1);
+	//mXY[xy1] = 1; // ERROR WILL NOT COMPILE //error C2678: бинарный "<": не найден оператор, прини
+
+	std::map<Coord, int> mCrd;
+	Coord c1(0, 1);
+	Coord c2(1, 0);
+	Coord c3(1, 1);
+	Coord c4(2, 2);
+	mCrd[c1] = 1; // size=1 | mCrd<(0, 1)> = 1;
+	mCrd[c2] = 2; // size=1 | mCrd<(0, 1)> = 2;
+	mCrd[c3] = 3; // size=1 | mCrd<(0, 1)> = 3;
+	mCrd[c3] = 4; // size=1 | mCrd<(0, 1)> = 4;
+
+	//if (c1 < c2)  std::cout << "c1 < c2";
+
+	std::map<Point, int> mPnt;
+	Point p1(0, 1);
+	Point p2(1, 0);
+	Point p3(1, 1);
+	Point p4(2, 2);
+	mPnt[p1] = 1; // size=1 | mCrd<(0, 1)> = 1;
+	mPnt[p2] = 2; // size=2 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2;
+	mPnt[p3] = 3; // size=3 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2; mCrd<(1, 1)> = 3;
+	mPnt[p3] = 4; // size=4 | mCrd<(0, 1)> = 1; mCrd<(1, 0)> = 2; mCrd<(1, 1)> = 3; mCrd<(2, 2)> = 4;
+
+	if (p1 < p2)  std::cout << "p1 < p2";
+	//if (p1>p2)  std::cout << "p1 > p2";
+	//if (p1==p2) std::cout << "p1 = p2";
+
+	std::cout << mPnt[p1] << mPnt[p2];
+}
+
 # Различие между С и С++ / между C и C++ / Разница между С и С++ / между C и C++
 
 - Си (структурное прогр.) | В С++ (Объектно ориентированное прогр.)
