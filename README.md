@@ -1078,7 +1078,7 @@ http://yarik-raider.blogspot.com/2010/01/mvc.html
 
 https://habr.com/ru/post/215605/
 
-- MVC - Model-View-Controller
+- MVC - Model-View-Controller (Controller -(changes)-> (changing) Model (changed) -(updates)-> View)
 - MVP - Model-View-Presenter
 - MVVM - Model-View-View Model
 - MVPVM - Model-View-Presenter-View Model
