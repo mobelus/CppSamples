@@ -4999,7 +4999,9 @@ Qt::ConnectionType type = Qt::AutoConnection
 | Qt::DirectConnection        | Sync | сигнал обрабатывается сразу вызовом соответствующего метода слота       |
 | Qt::QueuedConnection        | Async| сигнал преобразуется в событие и ставится в общую очередь для обработки |
 | Qt::AutoConnection          |Sy/Asy| это автоматический режим, который действует следующим образом (СМ. ТУТ) |
-| Qt::BlockingQueuedConnection| Async| как и QueuedConection но текущий поток блокается пока слот не доставится|	  
+| Qt::BlockingQueuedConnection| Async| как и QueuedConection но текущий поток блокается пока слот не доставится|
+| Qt::UniqueConnection        | -    | Передаётся как флаг " | Qt::UniqueConnection" блочит повторный коннект  |
+| Qt::UniqueConnection        | -    | одних и тех же сигналов и слотов                                        |
 
 **(СМ. ТУТ)**:
 - если отсылающий сигнал объект находится в одном потоке с принимающим его объектом, то устанавливается режим Qt::DirectConnection - CИНХРОННЫЙ Вариант,
@@ -5024,12 +5026,12 @@ QMetaObject::invokeMethod( pointerToObject*, "functionName", Qt::QueuedConnectio
 
 QObject::connect() сама по себе потокобезопасна.
 
-**СУТЬ:** Всё построена на QThread-ах, они начитнают своё выполнение после вызова фции run(). По умолчанию, run() запускает цикл сообщений (event loop), вызывая соотвественно exec() что и запускает Qt-шный цикл обработки сообщений (event loop) ынутри потока.
+**СУТЬ:** Всё построена на QThread-ах, они начитнают своё выполнение после вызова фции run(). По умолчанию, run() запускает цикл сообщений (event loop), вызывая соотвественно exec() что и запускает Qt-шный цикл обработки сообщений (event loop) внутри потока.
 Запуск собственного цикла обработки сообщений и дает возможность получать их в том числе и из других потоков. Фишка сигналов/слотов кьюта в том, что это еще и простая message queue система. Вызов в рамках одного потока - это прямой вызов подписанных слотов на этом же стеке, а вот QueuedConnection или межпоточные вызовы кладут в очередь соответствующего потока сообщение (эти сообщения лежат в одной очереди с сообщениями от ОС), и другой поток будет их извлекать в своём event-loop-е. Таким образом, вы просто просите другой поток вызвать слот, а вызовет он его когда в очередной раз будет отрабатывать цикл сообщений и он дойдет до сообщения о вызове слота.
 
 https://ru.stackoverflow.com/questions/758609/qt-%D0%BD%D0%B5-%D0%B2%D1%8B%D0%B7%D1%8B%D0%B2%D0%B0%D0%B5%D1%82%D1%81%D1%8F-%D1%81%D0%BB%D0%BE%D1%82-%D0%B2-%D0%B4%D1%80%D1%83%D0%B3%D0%BE%D0%BC-%D0%BF%D0%BE%D1%82%D0%BE%D0%BA%D0%B5#comment1174156_758616
 
-Запускаем QThread::start() поток. => начинается выполнение run(), Для того чтоб обрабатывать сообщения, внтури, нужно запустить QEventLoop::exec(). И далее как работают сигналы. В краце: Есть DirectConnection и QueuedConnection способы обработки сигнала, первый работает прямым вызовом колбэк функции в момент эмита сигнла, QueuedConnection отправляет служебное сообщение очередь потока к которому приписан объект и пока эта сообщение из очереди не будет обработано сигнал не дойдет до получателя. Для того чтоб обработать сообщение нужно создать QEventLoop объект (это и есть очередь) и вызвать exec() метод, это обработка сообщений. Когда ты запускаешь main, а внем QApplication::exec() Когда ты запускаешь main, а внем QApplication::exec() это и есть запуск QEventLoop объекта, который хранится в QApplication. Таким образом у тебя начинают работать сигналы отправленные через QueuedConnection, но только в главном потоке. Для других потоков надо делать все ручками
+Запускаем QThread::start() поток. => начинается выполнение run(), Для того чтоб обрабатывать сообщения, внтури, нужно запустить QEventLoop::exec(). И далее как работают сигналы. В краце: Есть DirectConnection и QueuedConnection способы обработки сигнала, первый работает прямым вызовом колбэк функции в момент эмита сигнла, QueuedConnection отправляет служебное сообщение очередь потока к которому приписан объект и пока эта сообщение из очереди не будет обработано сигнал не дойдет до получателя. Для того чтоб обработать сообщение нужно создать QEventLoop объект (это и есть очередь) и вызвать exec() метод, это обработка сообщений. Когда ты запускаешь main, в нем есть QApplication::exec() это и есть запуск QEventLoop объекта, который хранится в QApplication. Таким образом у тебя начинают работать сигналы отправленные через QueuedConnection, но только в главном потоке. Для других потоков надо делать все ручками
 
 
 https://stackoverflow.com/questions/38376840/qt-signals-and-slots-direct-connection-behaviour-in-application-with-a-single-th
@@ -5052,14 +5054,17 @@ If the type is Qt::DirectConnection, the second signal is always emitted from th
 if the type is Qt::QueuedConnection, the second signal is always queued to be invoked when control returns to the event loop of the receiver object's thread.
 If the type is Qt::AutoConnection, the connection type is resolved when the signal is emitted and the thread of the sending object is ignored.
 
-
-
-###  Наследование класса от QObject-а.
-Нужно в иерархии наследования выставлять его первым.
-
-
-#  QML + CPP:
+### Qt / QML:
+###  QML + CPP:
 https://habrahabr.ru/post/140899/
+
+- Писать класс наследник от QQuickItem: QQuickItem класс на стороне С++ позволяет писать свои визуальные и не-визуальные QML объекты на C++ стороне.
+- Регистрируем C++ типы при помощи qmlRegisterType<MyCppForQmlTypeClass>(): C++ классы можно регистрировать при помощи функции qmlRegisterType<MyQMLType>("com.yourcompany.xyz", 1, 0, "MyQMLType"); при помощи QMLной системы типов, позволяющая потом в qml писать имя класса и создавать в qml-е объекты этого класса как стандартные QML объекты.
+- Можно использовать класс на стороне qml, просто сделав его наследником QObject : QObject-ы могут быть загеристрированны в нутри QML-ного контекста, что позволяет внутри qml обращаться к их Q_PROPERTY и даёт прямой доступ к ним внутри qml. (Регистрация Context Q_PROPERTY)
+- Доступ до QML объектов через Дерево QML-объектов: все QML объекты хранятся в древовидной иерархии и доступ к ним можно получить через root()-элемент в дереве.
+
+
+# Как передавали данные в QML из C++ ?
 
 - Первый вариант:
 
@@ -5074,31 +5079,31 @@ h: Q_INVOCABLE function_name();
 ```
 class TestClass : public QObject
 {
-	Q_OBJECT
-		Q_PROPERTY(int someProperty READ getSomeProperty WRITE setSomeProperty NOTIFY somePropertyChanged)
+ Q_OBJECT
+  Q_PROPERTY(int someProperty READ getSomeProperty WRITE setSomeProperty NOTIFY somePropertyChanged)
 public:
-	explicit TestClass(QObject *parent = 0);
-	int getSomeProperty()const;
-	void setSomeProperty(const int &);
+ explicit TestClass(QObject *parent = 0);
+ int getSomeProperty()const;
+ void setSomeProperty(const int &);
 private:
-	int someProperty;
+ int someProperty;
 signals:
-	void somePropertyChanged();
-	public slots:
+ void somePropertyChanged();
+ public slots:
 };
 int TestClass::getSomeProperty()const
 {
-	qDebug() << "I'm getter";
-	return someProperty;
+ qDebug() << "I'm getter";
+ return someProperty;
 }
 void TestClass::setSomeProperty(const int &i)
 {
-	qDebug() << "I'm setter";
-	someProperty = i;
+ qDebug() << "I'm setter";
+ someProperty = i;
 }
 ```
 
-- emit - используется для высылки SIGNAL-а.
+- emit - ничего не делает, синтаксический сахар перед функцией-сигналом, его можно и не писать и сигнал всё равно вызовется
 
 
 ### - Signal Slot Permissions:
@@ -5113,8 +5118,9 @@ https://stackoverflow.com/questions/19129133/qt-signals-and-slots-permissions
 
 ### - SLOT по умолчанию НИКАКОЙ (требует самим дописать модификатор доступа)
 могут быть объявлены как virtual, public, protected, private
+
 ```
-#     define slots
+#define slots
 is defined as an empty macro and therefore can be used with:
 ```
 Программист ДОЛЖЕН написать перед slots что-то сам, иначе ошибка.
@@ -5123,7 +5129,7 @@ is defined as an empty macro and therefore can be used with:
 Signals are protected in Qt4 but are public in Qt5
 ```
 qobjectdefs.h (QT5.0+). In there are defined the moc macros
-#     define signals public
+#define signals public
 ```
 
 Такой вариант тоже будет работать:
@@ -5141,18 +5147,29 @@ https://stackoverflow.com/questions/19129133/qt-signals-and-slots-permissions
 ### Соединение СИГНАЛА с ВИРТУАЛЬНЫМ Слотом МЕДЛЕННЕ, чем с Невритуальным.
 - События могут обрабатываться лишь одним методом, а сигналы многими слотами. 
 
+### Чем отличается механизм Q_INVOCABLE и SLOT / Qinvocable?
 ### Разница между Q_INVOCABLE и SLOT-ом ?
 
-Q_INVOCABLE - привязывается как обычная колбэчная функция, с одним методом, вызываемом при "emite", для данной функции. Функции С++ вызывающиеся в QML.
+Q_INVOCABLE - привязывается как обычная колбэчная функция, с одним методом, вызываемом при "emit"-е, для данной функции. Функции С++ вызывающиеся в QML.
 
 SLOT - может быть любоче число сигналов, как и на любой сигнал можно повесить любое число слотов.
 
 ### QObject это базовый класс для всех Qt классов. 
 
+###  Наследование класса от QObject-а.
+Нужно в иерархии наследования выставлять его первым.
+
 ### Для чего нужен макрос Q_OBJECT (ТОЛЬКО В PRIVATE СЕКЦИИ !!!)
+### Зачем нужен макрос Q_OBJECT ?
 
 Q_OBJECT макрос используется для включения мета объектных функций в классах и на этапе компиляции moc (Meta Object Compilator) работает как препроцессор который преобразует применения макроса Q_OBJECT в исходный код C++.
 
+Внутри Q_OBJECT:
+- QMetaObject
+- qt_metacall
+- META_MACROS
+- Q_MOC_RUN
+- signals, slots, Q_PROPERTY, и прочее
 
 ### Что такое MOC
 
@@ -5207,24 +5224,7 @@ DialogBox
 ListView
 GridView
  
-# Qt / QML:
 
-
-# Как передавали данные в QML из C++ ?
-
-# Чем отличается механизм Q_INVOCABLE и SLOT ?
-
-Механизмы абсолютно разные !
-
-# Зачем нужен макрос Q_OBJECT ?
-
-
-Внутри Q_OBJECT:
-- QMetaObject
-- qt_metacall
-- META_MACROS
-- Q_MOC_RUN
-- signals, slots, Q_PROPERTY, и прочее
 
 ```
 #define Q_OBJECT \
