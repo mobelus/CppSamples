@@ -672,6 +672,55 @@ P.S.: Более подробное описание Вы можете найт�
    
  
 
+1) class A;
+```
+class A {
+ ~A();
+  A();
+  A(const A& other);
+  A& coperator= (const A& other)
+  A(A&& other);
+  A& coperator= (A&& other)
+};
+```
+
+2) Singleton
+```
+class A {
+public:
+  static A& i() {
+    static A a;
+    return a;
+  }
+private:
+  A() {}
+  A(const A& other) = delete;
+  A& operator=(constA& other) = delete;
+};
+```
+3) Creation Destruction
+```
+BA, BB, BC
+MA, MB, MC
+Z
+```
+
+4) tasks:
+- class_with_pointer
+- bubble_sort
+- quick_sort
+- binary_search
+- my_string
+- my_vector
+- spin_lock
+- thread_pool
+- producer_consumer
+- DFS - Number_of_islands
+- BFS - Binary_tree_level_order_traversal
+- 
+
+
+
 # CppSamples
 Small cpp Examples
 
