@@ -1,5 +1,12 @@
 
 # QtSamples
+
+###
+#### Kuba hasn't forgotten Monica 
+###
+
+https://github.com/KubaO/stackoverflown
+
 Many small samples of qt projects
 
 TODO - https://www.youtube.com/watch?time_continue=347&v=iR8K6ya0ZaY&feature=emb_logo
