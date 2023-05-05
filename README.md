@@ -165,6 +165,28 @@ for (int i = 0; i < listProxy.size(); ++i)
     funcProxy.replace(QString("%%1").arg(i + 1), listProxy.at(i));
 ```
 
+# From CPP to QML
+
+```
+    /*
+    cpp.h
+    void sigTest(QString sigString);
+
+    cpp.cpp
+    QTimer::singleShot(10000, [=]() {
+        emit sigTest("test");
+    });
+
+    WifiMainScreen.qml
+    Connections {
+        target: cppWifiMainSettings
+        onSigTest: {
+            console.log(sigString);
+        }
+    }
+    */
+```
+
 # QMessageBox
 
 ### QMessageBox BAD:
