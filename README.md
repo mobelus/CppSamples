@@ -165,26 +165,46 @@ for (int i = 0; i < listProxy.size(); ++i)
     funcProxy.replace(QString("%%1").arg(i + 1), listProxy.at(i));
 ```
 
-# From CPP to QML
-
+# From QML to CPP
 ```
-    /*
-    cpp.h
-    void sigTest(QString sigString);
+main.cpp
+ engine->rootContext()->setContextProperty("cppMyQml", m_ClassDerivedFromQObject);
 
-    cpp.cpp
-    QTimer::singleShot(10000, [=]() {
-        emit sigTest("test");
-    });
+cpp.h
+Q_INVOKABLE void sendParam(bool val);
 
-    WifiMainScreen.qml
-    Connections {
-        target: cppWifiMainSettings
-        onSigTest: {
-            console.log(sigString);
-        }
+cpp.cpp
+void sendParam(bool val) {
+    m_va = val;
+}
+
+MyQml.qml
+{
+    cppMyQml.sendParam(true);
+}
+						 
+```
+
+# From CPP to QML
+```
+main.cpp
+ engine->rootContext()->setContextProperty("cppMyQml", m_ClassDerivedFromQObject);
+	
+cpp.h
+void sigTest(QString sigString);
+
+cpp.cpp
+QTimer::singleShot(10000, [=]() {
+    emit sigTest("test");
+});
+
+MyQml.qml
+Connections {
+    target: cppMyQml
+    onSigTest: {
+        console.log(sigString);
     }
-    */
+}
 ```
 
 # QMessageBox
