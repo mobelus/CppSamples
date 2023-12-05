@@ -6864,6 +6864,5 @@ inline ullong str_hash_for_switch(const char* const str)
 }
 ```
 
-
-1
+FINISH
 
