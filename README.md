@@ -4337,7 +4337,6 @@ test.txt contains: 29 characters including spaces and \0
 ```
 
 
-Назовите четыре варианта приведения типов?
 
 ### [Q] Назовите четыре варианта приведения типов?
 
@@ -4382,7 +4381,6 @@ int r2 = static_cast<B *>(&c)->b; // 2
 - РАБОТАЕТ В ОБЕ СТОРОНЫ преобразуя и вниз и вверх по иерархии, НО
 - в случае преобразования вверх, может произойти процедура под названием
 - СРЕЗКА
-- RTTI - применяется для выполнения безопасного понижающего приведения. Позволяет определить, принадлежит ли объект данного типа некоторой иерархии наследования. Единственное приведение, которое не может быть выполнено с использованием старого синтаксиса в Си-стиле. Требует определённых временных затрат.
 
 **dynamic_cast**
 ```cpp
@@ -4394,29 +4392,31 @@ int r3 = dynamic_cast<B *>(&c)->b; // 2
 - dynamic_cast is useful when you don't know what the dynamic type of the object is. 
 - Возвращает нулевой указатель nullptr, если объект, на который он ссылается, не содержит тип, приведенный к базовому классу. (It returns a null pointer if the object referred to doesn't contain the type casted to as a base class)
 - НЕЛЬЗЯ использовать dynamic_cast для приведения к производному классу (понижающее приведение), если тип аргумента не является полиморфным. (You CAN NOT use dynamic_cast for downcast (casting to a derived class) if the argument type is not polymorphic.)
-  
+- dynamic_cast от других вариантов приведения типов отличается "Безопасным понижающим приведением" по иерархии наследования, в том числе и для виртуального наследования. 
+- Используется RTTI (Runtime Type Information), чтобы привести один указатель на объект класса к другому указателю на объект класса. RTTI - применяется для выполнения безопасного понижающего приведения. Позволяет определить, принадлежит ли объект данного типа некоторой иерархии наследования. Единственное приведение, которое не может быть выполнено с использованием старого синтаксиса в Си-стиле. Требует определённых временных затрат.
+
+
 **С-style Cstyle cast**
 ```cpp
 int r4 = ((B *)(&c))->b; // 2
 ```
 
 - Работает как
-- 1. static_cast<>, если не может то
-- 2. пробует как reinterpritate_cast<>
+1. static_cast<>, если не может то
+2. пробует как reinterpritate_cast<>
 
 
 **Casting**:
 1) **reinterpret_cast**: used for
-   1.1) casting between pointers of unrelated classes.
-   1.2) for ptr to int type cast.
+- 1.1) casting between pointers of unrelated classes.
+- 1.2) for ptr to int type cast.
 2) **const_cast**: used to remove constantness.
 3) **dynamic_cast**: is used to perform safe downcasting. Base ptr to derived class pointer.
 4) **static_cast**: for implicit type conversions. But it cannot cast from const to non-const object. This can only be done by const_cast operator.
-	4.1) non-const object to const
-	4.2) int to double
-	4.3) void* pointers to typed pointers
-	4.4)base pointers to derived pointers.
-
+- 4.1) non-const object to const
+- 4.2) int to double
+- 4.3) void* pointers to typed pointers
+- 4.4)base pointers to derived pointers.
 
 ```
 #include <iostream>
@@ -4446,7 +4446,6 @@ A * pA = new A;
 B * pB = reinterpret_cast<B*>(pA);
 }
 ```
-
 
 # QML все ответы на все вопросы
 
