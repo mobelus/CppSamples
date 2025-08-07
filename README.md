@@ -4280,7 +4280,7 @@ Thread affinity was introduced at the base level of QObject, which is the base o
 Signal and slot connections can now be used between objects of different thread affinity.
 
 3. QThread gained a default run implementation.
-```
+```cpp
 Example:
 Usage 2-0
 
@@ -4336,16 +4336,86 @@ Q) Command to count characters without opening it?
 test.txt contains: 29 characters including spaces and \0
 ```
 
-Casting:
-1) reinterpret_cast: used for i) casting between pointers of unrelated classes. ii) for ptr to int type cast.
-2) const_cast: used to remove constantness.
-3) dynamic_cast: is used to perform safe downcasting. Base ptr to derived class pointer.
-4) static_cast: for implicit type conversions
-i) non-const object to const,
-ii) int to double.
-iii) void* pointers to typed pointers,
-iv)base pointers to derived pointers.
-But it cannot cast from const to non-const object. This can only be done by const_cast operator.
+
+Назовите четыре варианта приведения типов?
+
+### [Q] Назовите четыре варианта приведения типов?
+
+https://stackoverflow.com/questions/28002/regular-cast-vs-static-cast-vs-dynamic-cast
+
+```
+struct A { int a; };
+struct B { int b; };
+struct C : public A, public B {};
+
+C c;
+c.a = 1;
+c.b = 2;
+```
+  
+**const_cast**
+- проверка на этапе КОМПИЛЯЦИИ
+– только снимает/добавляет модификатор const у указателей и ссылок без изменения их базового типа. 
+- НЕЛЬЗЯ работать с обычными переменными, с ними функция const_cast работать не будет: int a = 3; int b = const_cast<int>(a);
+- НЕЛЬЗЯ ею приводить ссылки и указатели РАЗНЫХ типов
+- Ошибка на этапе КОМПИЛЯЦИИ.
+
+**reinterpret_cast**
+```cpp
+int r1 = reinterpret_cast<B *>(&c)->b; // 1
+```
+- проверка на этапе КОМПИЛЯЦИИ
+- похож по своему действию на обычную операцию приведения типов языка Си, но работает с некоторыми ограничениями.
+- Во-первых, он применим все так же к указателям и ссылкам. С обычными переменными работать не будет.
+- Нужен для - Преобразование типов между указателями
+- Нужен для - Преобразование типов между ссылками
+- Если же указать разные типы, то возникнет ошибка. int a = 10; char c = reinterpret_cast<char>(a); // ошибка
+- Также мы можем делать приведение типов и между пользовательскими типами данных. 
+- может вызвать аппаратный останов, по причине того, что
+- работает напрямую с памятью как она есть
+
+**static_cast** 
+```cpp
+int r2 = static_cast<B *>(&c)->b; // 2
+```
+- проверка на этапе ВЫПОЛНЕНИЯ
+- РАБОТАЕТ В ОБЕ СТОРОНЫ преобразуя и вниз и вверх по иерархии, НО
+- в случае преобразования вверх, может произойти процедура под названием
+- СРЕЗКА
+- RTTI - применяется для выполнения безопасного понижающего приведения. Позволяет определить, принадлежит ли объект данного типа некоторой иерархии наследования. Единственное приведение, которое не может быть выполнено с использованием старого синтаксиса в Си-стиле. Требует определённых временных затрат.
+
+**dynamic_cast**
+```cpp
+int r3 = dynamic_cast<B *>(&c)->b; // 2
+```
+- проверка на этапе ВЫПОЛНЕНИЯ
+- РАБОТАЕТ В ОБЕ СТОРОНЫ преобразуя и вниз и вверх, НО его наличие зачастую говорит про плохой дизайн приложения
+- бросает throw std::bad_cast, при преобразовании к ссылке
+- dynamic_cast is useful when you don't know what the dynamic type of the object is. 
+- Возвращает нулевой указатель nullptr, если объект, на который он ссылается, не содержит тип, приведенный к базовому классу. (It returns a null pointer if the object referred to doesn't contain the type casted to as a base class)
+- НЕЛЬЗЯ использовать dynamic_cast для приведения к производному классу (понижающее приведение), если тип аргумента не является полиморфным. (You CAN NOT use dynamic_cast for downcast (casting to a derived class) if the argument type is not polymorphic.)
+  
+**С-style Cstyle cast**
+```cpp
+int r4 = ((B *)(&c))->b; // 2
+```
+
+- Работает как
+- 1. static_cast<>, если не может то
+- 2. пробует как reinterpritate_cast<>
+
+
+**Casting**:
+1) **reinterpret_cast**: used for
+   1.1) casting between pointers of unrelated classes.
+   1.2) for ptr to int type cast.
+2) **const_cast**: used to remove constantness.
+3) **dynamic_cast**: is used to perform safe downcasting. Base ptr to derived class pointer.
+4) **static_cast**: for implicit type conversions. But it cannot cast from const to non-const object. This can only be done by const_cast operator.
+	4.1) non-const object to const
+	4.2) int to double
+	4.3) void* pointers to typed pointers
+	4.4)base pointers to derived pointers.
 
 
 ```
@@ -4376,6 +4446,7 @@ A * pA = new A;
 B * pB = reinterpret_cast<B*>(pA);
 }
 ```
+
 
 # QML все ответы на все вопросы
 
